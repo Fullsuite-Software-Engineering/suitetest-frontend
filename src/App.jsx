@@ -1,13 +1,14 @@
-import { useState } from 'react'
-
+import { BrowserRouter, Routes, Route } from 'react-router'
+import OnboardingPage from './pages/applicant/OnboardingPage' 
 function App() {
 
   return (
-    <>
-      <div className='flex justify-center items-center'>
-        Okay na to
-      </div>
-    </>
+   <BrowserRouter>
+      <Routes>
+        <Route path='/' element={ <OnboardingPage/> }/>
+        {/* /admin */}
+      </Routes>
+   </BrowserRouter>
   )
 }
 
