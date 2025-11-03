@@ -10,6 +10,7 @@ import ComingSoon from './components/ComingSoon'
 import TestBankPage from './pages/admin/AssesmentsTab/TestBankPage'
 import NotFound from './components/NotFound'
 
+import ErrorMessage from './pages/admin/ErrorMessage'
 function App() {
   return (
     
@@ -30,8 +31,9 @@ function App() {
               <Route path='assesments' element={<TestBankPage/>} />
             </Route>
           </Route>
-          <Route path='*' element={<NotFound/>}/>
-        </Routes>
+          {/* <Route path='*' element={<NotFound/>}/> */}
+          <Route path='*' element={ <ErrorMessage/> }/>
+      </Routes>
       </BrowserRouter>
   )
 }
