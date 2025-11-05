@@ -31,6 +31,8 @@ function App() {
             <Route path="applicants" element={<TestPage />} />
             <Route path="trainings" element={<ComingSoon />} />
             <Route path="assesments" element={<TestBankPage />} />
+            {/*  */}
+            {/* <Route path="admin/applicants/results" element={<ResultsPage />} /> */}
           </Route>
         </Route>
         {/* <Route path='*' element={<NotFound/>}/> */}
