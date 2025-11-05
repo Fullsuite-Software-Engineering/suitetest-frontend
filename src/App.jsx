@@ -13,7 +13,8 @@ import TestBankPage from './pages/admin/AssesmentsTab/TestBankPage'
 
 // import NotFound from './components/NotFound'
 import ErrorMessage from "./pages/admin/ErrorMessage";
-
+import TestInstructions from "./pages/applicant/TestInstructions";
+import CompletedTestPage from "./pages/applicant/CompletedTestPage";
 
 function App() {
   return (
@@ -22,8 +23,9 @@ function App() {
       <Routes>
         {/* Applicant Routes */}
         <Route path="/" element={<ApplicantOnboardingPage />} />
+        <Route path="/instructions" element={<TestInstructions />} />
+        <Route path="/completed" element={<CompletedTestPage />} />
         <Route path="/auth/login" element={<LoginPage />} />
-
         {/* ProtectedRoutes */}
         {/* /admin protected routes */}
         <Route element={<AdminProtectedRoutes />}>
@@ -42,5 +44,4 @@ function App() {
     </BrowserRouter>
   );
 }
-
 export default App;
