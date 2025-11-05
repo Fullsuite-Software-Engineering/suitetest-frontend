@@ -121,10 +121,12 @@ const AdminSidebar = () => {
               {
                 icon: <CreditCard className="h-4 w-4 hidden sm:flex" />,
                 label: "Test Bank",
+                to: "/admin/assessments/",
               },
               {
                 icon: <BrickWall className="h-4 w-4 hidden sm:flex" />,
                 label: "Test Builder",
+                to: "/admin/trainings/test-builder",
               },
             ]}
           />

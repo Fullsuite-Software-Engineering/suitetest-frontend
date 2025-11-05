@@ -35,7 +35,7 @@ function App() {
             {/* added results route */}
             <Route path="applicants/results" element={<ResultsPage />} />
             <Route path="trainings" element={<ComingSoon />} />
-            <Route path="assesments" element={<TestBankPage />} />
+            <Route path="assessments" element={<TestBankPage />} />
             {/*  */}
             {/* <Route path="admin/applicants/results" element={<ResultsPage />} /> */}
           </Route>
