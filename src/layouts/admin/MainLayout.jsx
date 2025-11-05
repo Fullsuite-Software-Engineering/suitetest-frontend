@@ -39,7 +39,7 @@ function MainLayout() {
             <Menu size={20} />
           </button>
           <h1 className="text-lg font-semibold text-gray-800">Admin Panel</h1>
-          <div className="w-10"></div> {/* Spacer for balance */}
+          <div className="w-10"></div>
         </div>
 
         {/* Main Content */}
