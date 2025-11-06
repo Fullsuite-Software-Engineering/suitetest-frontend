@@ -6,11 +6,11 @@ const QuestionModal = ({ isOpen, onClose, question, setQuestion, onSave }) => {
   if (!isOpen) return null;
 
   const updateField = (field, value) => {
-    setQuestion(prev => ({ ...prev, [field]: value }));
+    setQuestion((prev) => ({ ...prev, [field]: value }));
   };
 
   const updateOption = (index, field, value) => {
-    setQuestion(prev => ({
+    setQuestion((prev) => ({
       ...prev,
       options: prev.options.map((opt, i) =>
         i === index ? { ...opt, [field]: value } : opt
@@ -19,14 +19,14 @@ const QuestionModal = ({ isOpen, onClose, question, setQuestion, onSave }) => {
   };
 
   const addOption = () => {
-    setQuestion(prev => ({
+    setQuestion((prev) => ({
       ...prev,
       options: [...prev.options, { option_text: "", is_correct: false }],
     }));
   };
 
   const removeOption = (index) => {
-    setQuestion(prev => ({
+    setQuestion((prev) => ({
       ...prev,
       options: prev.options.filter((_, i) => i !== index),
     }));
@@ -36,7 +36,7 @@ const QuestionModal = ({ isOpen, onClose, question, setQuestion, onSave }) => {
     if (question.question_type === "CB") {
       updateOption(index, "is_correct", !question.options[index].is_correct);
     } else {
-      setQuestion(prev => ({
+      setQuestion((prev) => ({
         ...prev,
         options: prev.options.map((opt, i) => ({
           ...opt,
@@ -53,9 +53,12 @@ const QuestionModal = ({ isOpen, onClose, question, setQuestion, onSave }) => {
           <div className="space-y-2">
             {[
               { text: "True", value: true },
-              { text: "False", value: false }
+              { text: "False", value: false },
             ].map((opt, i) => (
-              <div key={i} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+              <div
+                key={i}
+                className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg"
+              >
                 <input
                   type="radio"
                   checked={question.options[i]?.is_correct || false}
@@ -81,7 +84,9 @@ const QuestionModal = ({ isOpen, onClose, question, setQuestion, onSave }) => {
                 />
                 <input
                   value={opt.option_text}
-                  onChange={(e) => updateOption(i, "option_text", e.target.value)}
+                  onChange={(e) =>
+                    updateOption(i, "option_text", e.target.value)
+                  }
                   placeholder={`Option ${i + 1}`}
                   className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
                 />
@@ -117,7 +122,9 @@ const QuestionModal = ({ isOpen, onClose, question, setQuestion, onSave }) => {
                 />
                 <input
                   value={opt.option_text}
-                  onChange={(e) => updateOption(i, "option_text", e.target.value)}
+                  onChange={(e) =>
+                    updateOption(i, "option_text", e.target.value)
+                  }
                   placeholder={`Option ${i + 1}`}
                   className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
                 />
@@ -156,27 +163,27 @@ const QuestionModal = ({ isOpen, onClose, question, setQuestion, onSave }) => {
 
   const handleQuestionTypeChange = (newType) => {
     updateField("question_type", newType);
-    
+
     if (newType === "TF") {
-      setQuestion(prev => ({
+      setQuestion((prev) => ({
         ...prev,
         options: [
           { option_text: "True", is_correct: false },
-          { option_text: "False", is_correct: false }
-        ]
+          { option_text: "False", is_correct: false },
+        ],
       }));
     } else if (newType === "DESC") {
-      setQuestion(prev => ({
+      setQuestion((prev) => ({
         ...prev,
-        options: []
+        options: [],
       }));
     } else if (question.options.length === 0) {
-      setQuestion(prev => ({
+      setQuestion((prev) => ({
         ...prev,
         options: [
           { option_text: "", is_correct: false },
-          { option_text: "", is_correct: false }
-        ]
+          { option_text: "", is_correct: false },
+        ],
       }));
     }
   };
@@ -208,7 +215,7 @@ const QuestionModal = ({ isOpen, onClose, question, setQuestion, onSave }) => {
                 { value: "MC", label: "Multiple Choice" },
                 { value: "CB", label: "Checkbox" },
                 { value: "TF", label: "True/False" },
-                { value: "DESC", label: "Descriptive" }
+                { value: "DESC", label: "Descriptive" },
               ].map((type) => (
                 <button
                   key={type.value}
@@ -256,7 +263,9 @@ const QuestionModal = ({ isOpen, onClose, question, setQuestion, onSave }) => {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 {question.question_type === "TF" ? "Correct Answer" : "Options"}
                 {question.question_type === "CB" && (
-                  <span className="text-gray-500 text-xs ml-2">(Select all correct answers)</span>
+                  <span className="text-gray-500 text-xs ml-2">
+                    (Select all correct answers)
+                  </span>
                 )}
               </label>
               {renderOptionsForType()}
@@ -312,7 +321,7 @@ const QuestionManagement = ({ quiz, onBack }) => {
     explanation: "",
     options: [
       { option_text: "", is_correct: false },
-      { option_text: "", is_correct: false }
+      { option_text: "", is_correct: false },
     ],
   };
 
@@ -327,34 +336,39 @@ const QuestionManagement = ({ quiz, onBack }) => {
   const fetchQuestions = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${API_BASE_URL}/question/get/${quiz.quiz_id}`);
-      
-      // Transform the data to match your frontend structure
+      const response = await axios.get(
+        `${API_BASE_URL}/question/get/${quiz.quiz_id}`
+      );
+
       const questionsData = response.data.data || [];
-      
-      // Fetch options for each question
+
+      // Fetch options for each question individually
       const questionsWithOptions = await Promise.all(
         questionsData.map(async (q) => {
           try {
-            const optionsResponse = await axios.get(`${API_BASE_URL}/answer/get`);
-            const allOptions = optionsResponse.data.data || [];
-            const questionOptions = allOptions.filter(opt => opt.question_id === q.question_id);
-            
+            const optionsResponse = await axios.get(
+              `${API_BASE_URL}/answer/get/${q.question_id}`
+            );
+            const questionOptions = optionsResponse.data.data || [];
+
             return {
               ...q,
-              options: questionOptions.map(opt => ({
+              options: questionOptions.map((opt) => ({
                 answer_id: opt.answer_id,
                 option_text: opt.option_text,
-                is_correct: opt.is_correct
-              }))
+                is_correct: opt.is_correct,
+              })),
             };
           } catch (err) {
-            console.error(`Error fetching options for question ${q.question_id}:`, err);
+            console.error(
+              `Error fetching options for question ${q.question_id}:`,
+              err
+            );
             return { ...q, options: [] };
           }
         })
       );
-      
+
       setQuestions(questionsWithOptions);
       setError(null);
     } catch (err) {
@@ -383,7 +397,10 @@ const QuestionManagement = ({ quiz, onBack }) => {
     }
 
     if (currentQuestion.question_type !== "DESC") {
-      if (currentQuestion.question_type === "MC" || currentQuestion.question_type === "TF") {
+      if (
+        currentQuestion.question_type === "MC" ||
+        currentQuestion.question_type === "TF"
+      ) {
         if (!currentQuestion.options.some((o) => o.is_correct)) {
           return alert("Please select the correct answer.");
         }
@@ -392,8 +409,11 @@ const QuestionManagement = ({ quiz, onBack }) => {
           return alert("Please select at least one correct answer.");
         }
       }
-      
-      if (currentQuestion.question_type !== "TF" && currentQuestion.options.some(o => !o.option_text.trim())) {
+
+      if (
+        currentQuestion.question_type !== "TF" &&
+        currentQuestion.options.some((o) => !o.option_text.trim())
+      ) {
         return alert("All options must have text.");
       }
     }
@@ -404,10 +424,11 @@ const QuestionManagement = ({ quiz, onBack }) => {
         await axios.put(
           `${API_BASE_URL}/question/${quiz.quiz_id}/update/${currentQuestion.question_id}`,
           {
+            quiz_id: quiz.quiz_id,
             question_text: currentQuestion.question_text,
             question_type: currentQuestion.question_type,
             points: currentQuestion.points,
-            explanation: currentQuestion.explanation
+            explanation: currentQuestion.explanation,
           }
         );
 
@@ -416,11 +437,10 @@ const QuestionManagement = ({ quiz, onBack }) => {
           if (option.answer_id) {
             // Update existing option
             await axios.put(
-              `${API_BASE_URL}/answer/${currentQuestion.question_id}/update`,
+              `${API_BASE_URL}/answer/${option.answer_id}/update`,
               {
-                answer_id: option.answer_id,
                 option_text: option.option_text,
-                is_correct: option.is_correct
+                is_correct: option.is_correct,
               }
             );
           } else {
@@ -428,12 +448,26 @@ const QuestionManagement = ({ quiz, onBack }) => {
             await axios.post(
               `${API_BASE_URL}/answer/${currentQuestion.question_id}/create`,
               {
-                question_id: currentQuestion.question_id,
                 option_text: option.option_text,
-                is_correct: option.is_correct
+                is_correct: option.is_correct,
               }
             );
           }
+        }
+
+        // Handle deleted options (if any)
+        const originalQuestion = questions[editingIndex];
+        const currentOptionIds = currentQuestion.options
+          .map((opt) => opt.answer_id)
+          .filter(Boolean);
+        const deletedOptions = originalQuestion.options.filter(
+          (opt) => opt.answer_id && !currentOptionIds.includes(opt.answer_id)
+        );
+
+        for (const deletedOpt of deletedOptions) {
+          await axios.delete(
+            `${API_BASE_URL}/answer/${deletedOpt.answer_id}/delete`
+          );
         }
       } else {
         // Create new question
@@ -444,7 +478,7 @@ const QuestionManagement = ({ quiz, onBack }) => {
             question_text: currentQuestion.question_text,
             question_type: currentQuestion.question_type,
             points: currentQuestion.points,
-            explanation: currentQuestion.explanation
+            explanation: currentQuestion.explanation,
           }
         );
 
@@ -453,14 +487,10 @@ const QuestionManagement = ({ quiz, onBack }) => {
         // Create options for the new question
         if (currentQuestion.question_type !== "DESC") {
           for (const option of currentQuestion.options) {
-            await axios.post(
-              `${API_BASE_URL}/answer/${newQuestionId}/create`,
-              {
-                question_id: newQuestionId,
-                option_text: option.option_text,
-                is_correct: option.is_correct
-              }
-            );
+            await axios.post(`${API_BASE_URL}/answer/${newQuestionId}/create`, {
+              option_text: option.option_text,
+              is_correct: option.is_correct,
+            });
           }
         }
       }
@@ -479,16 +509,13 @@ const QuestionManagement = ({ quiz, onBack }) => {
     if (!confirm("Are you sure you want to delete this question?")) return;
 
     const question = questions[index];
-    
+
     try {
       // Delete all answer options first
       for (const option of question.options) {
         if (option.answer_id) {
           await axios.delete(
-            `${API_BASE_URL}/answer/${question.question_id}/delete`,
-            {
-              data: { answer_id: option.answer_id }
-            }
+            `${API_BASE_URL}/answer/${option.answer_id}/delete`
           );
         }
       }
@@ -512,7 +539,7 @@ const QuestionManagement = ({ quiz, onBack }) => {
       MC: "Multiple Choice",
       CB: "Checkbox",
       TF: "True/False",
-      DESC: "Descriptive"
+      DESC: "Descriptive",
     };
     return labels[type] || type;
   };
@@ -530,7 +557,9 @@ const QuestionManagement = ({ quiz, onBack }) => {
 
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">{quiz?.quiz_name || "Question Bank"}</h1>
+            <h1 className="text-3xl font-bold text-gray-900">
+              {quiz?.quiz_name || "Question Bank"}
+            </h1>
             <p className="text-gray-600 mt-1">Manage your test questions</p>
           </div>
           <button
@@ -558,8 +587,12 @@ const QuestionManagement = ({ quiz, onBack }) => {
             <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <Plus className="w-8 h-8 text-gray-400" />
             </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">No questions yet</h3>
-            <p className="text-gray-600 mb-4">Get started by adding your first question</p>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              No questions yet
+            </h3>
+            <p className="text-gray-600 mb-4">
+              Get started by adding your first question
+            </p>
             <button
               onClick={openAddModal}
               className="px-5 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-colors"
@@ -582,29 +615,35 @@ const QuestionManagement = ({ quiz, onBack }) => {
                       </span>
                       <span className="flex items-center gap-1 text-gray-600 text-sm">
                         <Clock className="w-4 h-4" />
-                        {q.points} {q.points === 1 ? 'point' : 'points'}
+                        {q.points} {q.points === 1 ? "point" : "points"}
                       </span>
                     </div>
                     <p className="text-gray-900 font-medium text-lg mb-2">
                       {q.question_text}
                     </p>
-                    {q.question_type !== "DESC" && q.options && q.options.length > 0 && (
-                      <div className="mt-3 space-y-1">
-                        {q.options.map((opt, optIndex) => (
-                          <div
-                            key={optIndex}
-                            className={`flex items-center gap-2 text-sm ${
-                              opt.is_correct ? 'text-teal-700 font-medium' : 'text-gray-600'
-                            }`}
-                          >
-                            <span className={`w-1.5 h-1.5 rounded-full ${
-                              opt.is_correct ? 'bg-teal-500' : 'bg-gray-300'
-                            }`}></span>
-                            {opt.option_text}
-                          </div>
-                        ))}
-                      </div>
-                    )}
+                    {q.question_type !== "DESC" &&
+                      q.options &&
+                      q.options.length > 0 && (
+                        <div className="mt-3 space-y-1">
+                          {q.options.map((opt, optIndex) => (
+                            <div
+                              key={optIndex}
+                              className={`flex items-center gap-2 text-sm ${
+                                opt.is_correct
+                                  ? "text-teal-700 font-medium"
+                                  : "text-gray-600"
+                              }`}
+                            >
+                              <span
+                                className={`w-1.5 h-1.5 rounded-full ${
+                                  opt.is_correct ? "bg-teal-500" : "bg-gray-300"
+                                }`}
+                              ></span>
+                              {opt.option_text}
+                            </div>
+                          ))}
+                        </div>
+                      )}
                   </div>
                   <div className="flex gap-2">
                     <button

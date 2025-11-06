@@ -1,6 +1,5 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom"; // Add this import
-import Footer from "../../components/applicant/Footer";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 
 const ApplicantOnboardingPage = () => {
   const [formData, setFormData] = useState({
@@ -9,31 +8,192 @@ const ApplicantOnboardingPage = () => {
     email: "",
     department: "",
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isValidating, setIsValidating] = useState(true);
+  const [inviteData, setInviteData] = useState(null);
+  const [error, setError] = useState(null);
 
-  const navigate = useNavigate(); // Add this hook
+  const navigate = useNavigate();
+  const { token } = useParams();
+
+  useEffect(() => {
+    validateInviteToken();
+  }, [token]);
+
+  const validateInviteToken = async () => {
+    if (!token) {
+      setError("Invalid invitation link. Please use the link provided in your email.");
+      setIsValidating(false);
+      return;
+    }
+
+    try {
+      console.log("Validating token:", token);
+      const response = await fetch(`http://localhost:3000/api/invitation/validate/${token}`);
+      
+      console.log("Validation response status:", response.status);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Validation error response:", errorText);
+        
+        if (response.status === 404) {
+          throw new Error("Invitation validation endpoint not found. Please ensure your backend has the /api/invitation/validate/:token route.");
+        }
+        
+        throw new Error("Invalid or expired invitation link");
+      }
+
+      const result = await response.json();
+
+      console.log("Validation result:", result);
+      console.log("Result.data contents:", result.data);
+
+      if (!result.data) {
+        console.error("No data object in result:", result);
+        throw new Error("Invalid invitation data received from server");
+      }
+
+      setInviteData(result.data);
+      
+      const email = result.data.email || result.data.invitee_email || "";
+      const deptId = result.data.dept_id || result.data.department_id || result.data.deptId || "";
+      
+      console.log("Extracted values - email:", email, "dept_id:", deptId);
+      
+      if (!email) {
+        throw new Error("Email not found in invitation data");
+      }
+      
+      setFormData(prev => ({
+        ...prev,
+        email: email,
+        department: deptId ? deptId.toString() : ""
+      }));
+
+      setIsValidating(false);
+      console.log("Validation successful!");
+    } catch (err) {
+      console.error("Token validation error:", err);
+      setError(err.message || "Failed to validate invitation");
+      setIsValidating(false);
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    
+    if (name === "email") return;
+    
     setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
   };
 
-  const handleSubmit = () => {
-    if (formData.firstName && formData.lastName && formData.email) {
-      console.log("Form submitted:", formData);
+  const handleSubmit = async () => {
+    if (!inviteData) {
+      alert("Invalid invitation. Please use a valid invite link.");
+      return;
+    }
 
-      // You can save the form data to context, state management, or localStorage if needed
-      // For example, using localStorage:
-      localStorage.setItem("applicantData", JSON.stringify(formData));
+    if (formData.email !== inviteData.email) {
+      alert("Email must match the invitation. Please contact your recruiter if you need to change it.");
+      return;
+    }
 
-      // Navigate to instructions page
-      navigate("/instructions");
+    if (formData.firstName && formData.lastName && formData.email && formData.department) {
+      setIsSubmitting(true);
+      
+      try {
+        const applicantData = {
+          token: token,
+          first_name: formData.firstName,
+          last_name: formData.lastName,
+          email: formData.email
+        };
+
+        console.log("Submitting applicant data:", applicantData);
+
+        const response = await fetch('http://localhost:3000/api/invitation/complete', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(applicantData)
+        });
+
+        const text = await response.text();
+        let result;
+        
+        try {
+          result = JSON.parse(text);
+        } catch (e) {
+          console.error("Response is not JSON:", text);
+          throw new Error("Server returned invalid response");
+        }
+
+        if (!response.ok) {
+          throw new Error(result?.message || 'Failed to submit form');
+        }
+
+        console.log("Form submitted successfully:", result);
+
+        const applicantDataForStorage = {
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          email: formData.email,
+          department: formData.department,
+          examiner_id: result.data.examiner.examiner_id
+        };
+        
+        localStorage.setItem("applicantData", JSON.stringify(applicantDataForStorage));
+        localStorage.setItem("selectedQuiz", JSON.stringify(result.data.quiz));
+
+        navigate("/test-instructions", {
+          state: { 
+            applicantData: applicantDataForStorage,
+            selectedQuiz: result.data.quiz
+          }
+        });
+      } catch (error) {
+        console.error("Error submitting form:", error);
+        alert(`Error: ${error.message}. Please try again.`);
+      } finally {
+        setIsSubmitting(false);
+      }
     } else {
-      alert("Please fill in all fields");
+      alert("Please fill in all required fields");
     }
   };
+
+  if (isValidating) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-cyan-200 border-t-cyan-600 rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">Validating invitation...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+        <div className="max-w-md w-full bg-white rounded-2xl p-8 text-center border border-gray-200" style={{ boxShadow: "4px 4px 0px 0px rgba(0, 0, 0, 1)" }}>
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Invalid Invitation</h2>
+          <p className="text-gray-600 mb-6">{error}</p>
+          <p className="text-sm text-gray-500">Please contact your recruiter for a new invitation link.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -42,7 +202,6 @@ const ApplicantOnboardingPage = () => {
     >
       <div className="flex-1 flex items-center justify-center px-4 py-8 sm:py-12">
         <div className="w-full max-w-5xl flex flex-col lg:flex-row gap-8 lg:gap-12 items-center">
-          {/* Left Section - Welcome Message */}
           <div className="flex-1 w-full lg:w-auto text-center lg:text-left">
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-6 lg:mb-8">
               <span className="text-cyan-600">Welcome,</span>{" "}
@@ -74,9 +233,7 @@ const ApplicantOnboardingPage = () => {
             </div>
           </div>
 
-          {/* Right Section - Application Form */}
           <div className="w-full sm:w-96">
-            {/* Form Card */}
             <div
               className="bg-white rounded-2xl p-6 sm:p-8 relative border border-gray-200 mb-6 sm:mb-0"
               style={{ boxShadow: "4px 4px 0px 0px rgba(0, 0, 0, 1)" }}
@@ -87,7 +244,6 @@ const ApplicantOnboardingPage = () => {
               </p>
 
               <div>
-                {/* Full Name */}
                 <div className="mb-5">
                   <label className="block text-xs font-bold mb-2 text-gray-900">
                     Full Name
@@ -98,7 +254,8 @@ const ApplicantOnboardingPage = () => {
                     placeholder="First Name"
                     value={formData.firstName}
                     onChange={handleChange}
-                    className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md mb-2.5 focus:outline-none focus:ring-1 focus:ring-cyan-500 focus:border-cyan-500 placeholder-gray-400 font-['Poppins']"
+                    disabled={isSubmitting}
+                    className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md mb-2.5 focus:outline-none focus:ring-1 focus:ring-cyan-500 focus:border-cyan-500 placeholder-gray-400 font-['Poppins'] disabled:bg-gray-100"
                   />
                   <input
                     type="text"
@@ -106,11 +263,11 @@ const ApplicantOnboardingPage = () => {
                     placeholder="Last Name"
                     value={formData.lastName}
                     onChange={handleChange}
-                    className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-cyan-500 focus:border-cyan-500 placeholder-gray-400 font-['Poppins']"
+                    disabled={isSubmitting}
+                    className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-cyan-500 focus:border-cyan-500 placeholder-gray-400 font-['Poppins'] disabled:bg-gray-100"
                   />
                 </div>
 
-                {/* Email Address */}
                 <div className="mb-6 sm:mb-4">
                   <label className="block text-xs font-bold mb-2 text-gray-900">
                     Email Address
@@ -121,41 +278,56 @@ const ApplicantOnboardingPage = () => {
                     placeholder="example@email.com"
                     value={formData.email}
                     onChange={handleChange}
-                    className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-cyan-500 focus:border-cyan-500 placeholder-gray-400 font-['Poppins']"
+                    disabled={true}
+                    className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:outline-none bg-gray-100 text-gray-600 placeholder-gray-400 font-['Poppins'] cursor-not-allowed"
                   />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Email cannot be changed (from invitation)
+                  </p>
                 </div>
 
-                {/* Department */}
-                {/* added Department Field */}
                 <div className="mb-6 sm:mb-6">
                   <label className="block text-[11px] sm:text-xs font-bold mb-2 text-gray-900">
-                    Department
+                    Department <span className="text-red-500">*</span>
                   </label>
                   <select
                     name="department"
                     value={formData.department}
                     onChange={handleChange}
-                    className="w-full px-3 py-2.5 text-sm sm:text-base border
-                       border-gray-300 rounded-md focus:outline-none 
-                       focus:ring-1 focus:ring-cyan-500 focus:border-cyan-500
-                        bg-white text-gray-700 font-['Poppins'] pr-10"
+                    disabled={inviteData?.dept_id ? true : false}
+                    className="w-full px-3 py-2.5 text-sm sm:text-base border border-gray-300 rounded-md bg-white text-gray-700 font-['Poppins'] pr-10 disabled:bg-gray-100 disabled:cursor-not-allowed focus:outline-none focus:ring-1 focus:ring-cyan-500"
                   >
                     <option value="">Select department</option>
-                    <option value="HR">Human Resources</option>
-                    <option value="ENG">Engineering</option>
-                    <option value="FN">Finance</option>
-                    <option value="BO">Business Ops</option>
+                    <option value="60">Engineering</option>
+                    <option value="64">Human Resources</option>
+                    <option value="62">Finance</option>
+                    <option value="61">Business Operations</option>
+                    <option value="63">Marketing</option>
+                    <option value="65">IT Support</option>
+                    <option value="66">Design</option>
+                    <option value="67">Legal</option>
+                    <option value="68">Customer Service</option>
+                    <option value="69">Product Management</option>
                   </select>
+                  {inviteData?.dept_id ? (
+                    <p className="text-xs text-gray-500 mt-1">
+                      Department set by invitation
+                    </p>
+                  ) : (
+                    <p className="text-xs text-amber-600 mt-1">
+                      ⚠️ Please select your department
+                    </p>
+                  )}
                 </div>
 
-                {/* Submit Button - Hidden on mobile, visible on sm+ */}
                 <div className="hidden sm:flex justify-end">
                   <button
                     onClick={handleSubmit}
-                    className="bg-cyan-600 hover:bg-cyan-700 text-white  font-semibold px-10 py-3 rounded-lg shadow-lg transition-colors duration-200 flex items-center gap-2 text-sm group"
+                    disabled={isSubmitting}
+                    className="bg-cyan-600 hover:bg-cyan-700 text-white font-semibold px-10 py-3 rounded-lg shadow-lg transition-colors duration-200 flex items-center gap-2 text-sm group disabled:bg-gray-400 disabled:cursor-not-allowed"
                     style={{ boxShadow: "4px 4px 0px 0px rgba(0, 0, 0, 1)" }}
                   >
-                    Proceed
+                    {isSubmitting ? "Submitting..." : "Proceed"}
                     <svg
                       className="w-5 h-5"
                       fill="none"
@@ -174,14 +346,14 @@ const ApplicantOnboardingPage = () => {
               </div>
             </div>
 
-            {/* Submit Button - Visible only on mobile, outside the form card */}
             <div className="sm:hidden w-full">
               <button
                 onClick={handleSubmit}
-                className="bg-cyan-600 hover:bg-cyan-700 text-white text-[18px] font-semibold w-full py-4 rounded-lg shadow-lg transition-colors duration-200 flex items-center justify-center gap-2 text-sm group"
+                disabled={isSubmitting}
+                className="bg-cyan-600 hover:bg-cyan-700 text-white text-[18px] font-semibold w-full py-4 rounded-lg shadow-lg transition-colors duration-200 flex items-center justify-center gap-2 text-sm group disabled:bg-gray-400 disabled:cursor-not-allowed"
                 style={{ boxShadow: "4px 4px 0px 0px rgba(0, 0, 0, 1)" }}
               >
-                Proceed
+                {isSubmitting ? "Submitting..." : "Proceed"}
                 <svg
                   className="w-5 h-5"
                   fill="none"
@@ -201,7 +373,6 @@ const ApplicantOnboardingPage = () => {
         </div>
       </div>
 
-      {/* Data Privacy Notice */}
       <div className="bg-gray-50 px-4 py-6">
         <p className="text-xs text-center text-gray-700 max-w-5xl mx-auto leading-relaxed">
           <span className="font-bold">Data Privacy Notice:</span> All
@@ -212,8 +383,9 @@ const ApplicantOnboardingPage = () => {
         </p>
       </div>
 
-      {/* Footer */}
-      <Footer />
+      <div className="bg-gray-100 py-4 text-center text-xs text-gray-600">
+        © 2024 Your Company. All rights reserved.
+      </div>
     </div>
   );
 };

@@ -7,6 +7,9 @@ import {
   Edit2,
   ArrowLeft,
   Clock,
+  Link as LinkIcon,
+  Copy,
+  Check,
 } from "lucide-react";
 import QuestionManagement from "./QuestionManagement";
 
@@ -16,15 +19,21 @@ const QuizManagement = ({ department, onBack }) => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showInviteModal, setShowInviteModal] = useState(false);
   const [newQuiz, setNewQuiz] = useState({ quiz_name: "", time_limit: "" });
   const [editingQuiz, setEditingQuiz] = useState(null);
   const [deletingQuiz, setDeletingQuiz] = useState(null);
+  const [selectedQuizForInvite, setSelectedQuizForInvite] = useState(null);
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [generatedLink, setGeneratedLink] = useState("");
+  const [copied, setCopied] = useState(false);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [openMenuId, setOpenMenuId] = useState(null);
   const [selectedQuiz, setSelectedQuiz] = useState(null);
 
   const API_BASE_URL = `http://localhost:3000/api/quiz`;
+  const INVITE_API_BASE_URL = `http://localhost:3000/api/invitation`;
 
   useEffect(() => {
     fetchQuizzes();
@@ -40,7 +49,6 @@ const QuizManagement = ({ department, onBack }) => {
     try {
       setLoading(true);
       const response = await axios.get(`${API_BASE_URL}/get/${department.dept_id}`);
-      
       setQuizzes(response.data.data || []);
       setError(null);
     } catch (err) {
@@ -75,12 +83,7 @@ const QuizManagement = ({ department, onBack }) => {
   };
 
   const handleUpdateQuiz = async () => {
-    if (
-      !editingQuiz ||
-      !editingQuiz.quiz_name.trim() ||
-      !editingQuiz.time_limit
-    )
-      return;
+    if (!editingQuiz || !editingQuiz.quiz_name.trim() || !editingQuiz.time_limit) return;
 
     try {
       await axios.put(
@@ -119,6 +122,46 @@ const QuizManagement = ({ department, onBack }) => {
     }
   };
 
+  const handleGenerateInvite = async () => {
+    if (!inviteEmail.trim() || !selectedQuizForInvite) return;
+
+    try {
+      const response = await axios.post(`${INVITE_API_BASE_URL}/generate`, {
+        email: inviteEmail,
+        quiz_id: selectedQuizForInvite.quiz_id,
+        dept_id: department.dept_id,
+      });
+
+      setGeneratedLink(response.data.data.link);
+      setError(null);
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to generate invitation link");
+      console.error("Error generating invitation:", err);
+    }
+  };
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(generatedLink);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const openInviteModal = (quiz) => {
+    setSelectedQuizForInvite(quiz);
+    setShowInviteModal(true);
+    setInviteEmail("");
+    setGeneratedLink("");
+    setCopied(false);
+  };
+
+  const closeInviteModal = () => {
+    setShowInviteModal(false);
+    setSelectedQuizForInvite(null);
+    setInviteEmail("");
+    setGeneratedLink("");
+    setCopied(false);
+  };
+
   const filteredQuizzes = quizzes.filter((quiz) =>
     quiz.quiz_name.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -136,7 +179,6 @@ const QuizManagement = ({ department, onBack }) => {
   return (
     <div className="min-h-screen bg-white p-6">
       <div className="max-w-7xl mx-auto">
-        {/* Back Button */}
         <button
           onClick={onBack}
           className="flex items-center gap-2 text-gray-600 hover:text-gray-800 mb-6 transition-colors"
@@ -145,7 +187,6 @@ const QuizManagement = ({ department, onBack }) => {
           <span className="font-medium">Back to Categories</span>
         </button>
 
-        {/* Header Section */}
         <div className="mb-8">
           <div className="flex justify-between items-start mb-2">
             <div>
@@ -163,7 +204,6 @@ const QuizManagement = ({ department, onBack }) => {
           </div>
         </div>
 
-        {/* Categories Label */}
         <div className="mb-6">
           <h2 className="text-lg font-semibold text-gray-700">Categories</h2>
         </div>
@@ -193,7 +233,6 @@ const QuizManagement = ({ department, onBack }) => {
                 key={quiz.quiz_id}
                 className="bg-white rounded-xl border border-gray-200 p-5 hover:shadow-md transition-shadow relative"
               >
-                {/* Header */}
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
                     <h3 className="text-lg font-semibold text-gray-900 mb-1">
@@ -239,7 +278,6 @@ const QuizManagement = ({ department, onBack }) => {
                   )}
                 </div>
 
-                {/* Time Badge */}
                 <div className="flex items-center gap-1 mb-4">
                   <Clock size={14} className="text-teal-600" />
                   <span className="text-xs text-gray-600 font-medium">
@@ -247,12 +285,16 @@ const QuizManagement = ({ department, onBack }) => {
                   </span>
                 </div>
 
-                {/* Empty Space for Content */}
                 <div className="h-24 mb-4"></div>
 
-                {/* Footer */}
                 <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                  <div className="flex gap-2"></div>
+                  <button 
+                    onClick={() => openInviteModal(quiz)}
+                    className="flex items-center gap-2 bg-emerald-600 text-white px-4 py-1.5 rounded-lg text-sm font-medium transition-colors hover:bg-emerald-700"
+                  >
+                    <LinkIcon size={16} />
+                    Invite
+                  </button>
                   <button 
                     onClick={() => setSelectedQuiz(quiz)}
                     className="bg-cyan-600 text-white px-6 py-1.5 rounded-lg text-sm font-medium transition-colors hover:bg-cyan-700"
@@ -261,7 +303,6 @@ const QuizManagement = ({ department, onBack }) => {
                   </button>
                 </div>
 
-                {/* Progress Indicator */}
                 <div className="mt-3">
                   <p className="text-xs text-gray-400">12 / 20</p>
                 </div>
@@ -435,6 +476,99 @@ const QuizManagement = ({ department, onBack }) => {
                 Delete
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Invite Link Modal */}
+      {showInviteModal && selectedQuizForInvite && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl p-8 max-w-md w-full shadow-2xl">
+            <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <LinkIcon size={28} className="text-emerald-600" />
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2 text-center">
+              Generate Invite Link
+            </h2>
+            <p className="text-gray-600 text-center mb-6">
+              {selectedQuizForInvite.quiz_name}
+            </p>
+            
+            {!generatedLink ? (
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Participant Email
+                  </label>
+                  <input
+                    type="email"
+                    value={inviteEmail}
+                    onChange={(e) => setInviteEmail(e.target.value)}
+                    placeholder="Enter email address"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                    onKeyPress={(e) => e.key === "Enter" && handleGenerateInvite()}
+                    autoFocus
+                  />
+                </div>
+                <div className="flex gap-3">
+                  <button
+                    onClick={closeInviteModal}
+                    className="flex-1 px-4 py-2.5 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors font-medium"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleGenerateInvite}
+                    disabled={!inviteEmail.trim()}
+                    className="flex-1 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Generate Link
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Invitation Link
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={generatedLink}
+                      readOnly
+                      className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg bg-gray-50 text-sm"
+                    />
+                    <button
+                      onClick={handleCopyLink}
+                      className="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                    >
+                      {copied ? (
+                        <Check size={20} className="text-emerald-600" />
+                      ) : (
+                        <Copy size={20} className="text-gray-600" />
+                      )}
+                    </button>
+                  </div>
+                  {copied && (
+                    <p className="text-sm text-emerald-600 mt-2">
+                      Link copied to clipboard!
+                    </p>
+                  )}
+                </div>
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                  <p className="text-sm text-blue-800">
+                    This link will expire in 24 hours and can only be used once.
+                  </p>
+                </div>
+                <button
+                  onClick={closeInviteModal}
+                  className="w-full px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors font-medium"
+                >
+                  Done
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}

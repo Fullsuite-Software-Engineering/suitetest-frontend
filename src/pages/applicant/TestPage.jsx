@@ -1,22 +1,53 @@
 import React, { useState, useEffect } from "react";
-import ClockIcon from "../assets/Clock.svg";
-import CorrectIcon from "../assets/Correct.svg";
-import WrongIcon from "../assets/Wrong.svg";
+import { useNavigate, useLocation } from "react-router-dom";
+import ClockIcon from "../../assets/Clock.svg";
+import CorrectIcon from "../../assets/Correct.svg";
+import WrongIcon from "../../assets/Wrong.svg";
 import Footer from "../../components/applicant/Footer";
 
 const TestPage = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
   const [selectedAnswer, setSelectedAnswer] = useState(null);
-  const [currentQuestion, setCurrentQuestion] = useState(2);
-  const [timeRemaining, setTimeRemaining] = useState(875); // 14:35 in seconds
-  const totalQuestions = 5;
+  const [selectedAnswers, setSelectedAnswers] = useState([]); // For checkbox questions
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [timeRemaining, setTimeRemaining] = useState(0);
+  const [questions, setQuestions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [userAnswers, setUserAnswers] = useState([]);
+  const [quizData, setQuizData] = useState(null);
+
+  const API_BASE_URL = "http://localhost:3000/api";
+
+  // Initialize quiz data and fetch questions
+  useEffect(() => {
+    const selectedQuiz = location.state?.quizData || 
+      JSON.parse(localStorage.getItem("selectedQuiz") || "null");
+    
+    const applicantData = location.state?.applicantData || 
+      JSON.parse(localStorage.getItem("applicantData") || "{}");
+
+    if (!selectedQuiz || !applicantData.department) {
+      alert("No quiz selected. Redirecting...");
+      navigate("/quiz-selection");
+      return;
+    }
+
+    setQuizData(selectedQuiz);
+    setTimeRemaining(selectedQuiz.time_limit * 60); // Convert minutes to seconds
+    fetchQuestions(selectedQuiz.quiz_id);
+  }, []);
 
   // Timer countdown
   useEffect(() => {
+    if (timeRemaining <= 0 || loading) return;
+
     const timer = setInterval(() => {
       setTimeRemaining((prev) => {
-        if (prev <= 0) {
+        if (prev <= 1) {
           clearInterval(timer);
-          alert("Time is up!");
+          handleTimeUp();
           return 0;
         }
         return prev - 1;
@@ -24,54 +55,227 @@ const TestPage = () => {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, []);
+  }, [timeRemaining, loading]);
 
-  // Format time as MM:SS
+  const fetchQuestions = async (quizId) => {
+    try {
+      setLoading(true);
+      
+      // Fetch questions
+      const questionsResponse = await fetch(
+        `${API_BASE_URL}/question/get/${quizId}`
+      );
+      
+      if (!questionsResponse.ok) {
+        throw new Error("Failed to fetch questions");
+      }
+
+      const questionsResult = await questionsResponse.json();
+      const questionsData = questionsResult.data || [];
+
+      // Fetch options for each question
+      const questionsWithOptions = await Promise.all(
+        questionsData.map(async (question) => {
+          try {
+            const optionsResponse = await fetch(
+              `${API_BASE_URL}/answer/get/${question.question_id}`
+            );
+            
+            if (!optionsResponse.ok) {
+              return { ...question, options: [] };
+            }
+
+            const optionsResult = await optionsResponse.json();
+            const options = optionsResult.data || [];
+
+            return {
+              ...question,
+              options: options.map((opt) => ({
+                answer_id: opt.answer_id,
+                option_text: opt.option_text,
+                is_correct: opt.is_correct,
+              })),
+            };
+          } catch (err) {
+            console.error(`Error fetching options for question ${question.question_id}:`, err);
+            return { ...question, options: [] };
+          }
+        })
+      );
+
+      setQuestions(questionsWithOptions);
+      
+      // Initialize userAnswers array
+      setUserAnswers(new Array(questionsWithOptions.length).fill(null));
+      
+    } catch (error) {
+      console.error("Error fetching questions:", error);
+      alert("Failed to load questions. Please try again.");
+      navigate("/quiz-selection");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleTimeUp = () => {
+    alert("Time is up! Submitting your answers...");
+    submitTest();
+  };
+
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
-  // Static data - will be replaced with backend data
-  const questionData = {
-    category: "Problem Solving",
-    question:
-      "Logical Deduction All roses are flowers. Some flowers fade quickly. Therefore:",
-    options: [
-      { id: 1, value: "All roses fade quickly.", correct: false },
-      { id: 2, value: "Some roses may fade quickly.", correct: true },
-      { id: 3, value: "No roses fade quickly.", correct: false },
-      { id: 4, value: "None of the above.", correct: false },
-    ],
-  };
-
-  const handleAnswerSelect = (id) => {
-    setSelectedAnswer(id);
+  const handleAnswerSelect = (answerId) => {
+    const currentQuestion = questions[currentQuestionIndex];
+    
+    if (currentQuestion.question_type === "CB") {
+      // Checkbox - multiple selection
+      setSelectedAnswers((prev) => {
+        if (prev.includes(answerId)) {
+          return prev.filter((id) => id !== answerId);
+        } else {
+          return [...prev, answerId];
+        }
+      });
+    } else {
+      // Single selection (MC, TF)
+      setSelectedAnswer(answerId);
+    }
   };
 
   const handleNext = () => {
-    if (selectedAnswer === null) {
-      alert("Please select an answer");
-      return;
-    }
-
-    console.log("Selected answer:", selectedAnswer);
-
-    // Move to next question logic here
-    if (currentQuestion < totalQuestions) {
-      setCurrentQuestion(currentQuestion + 1);
-      setSelectedAnswer(null);
+    const currentQuestion = questions[currentQuestionIndex];
+    
+    // Validate answer selection
+    if (currentQuestion.question_type === "CB") {
+      if (selectedAnswers.length === 0) {
+        alert("Please select at least one answer");
+        return;
+      }
+    } else if (currentQuestion.question_type === "DESC") {
+      // For descriptive, we can allow empty for now
     } else {
-      // Test completed - redirect to CompletedTest page
-      window.location.href = "/CompletedTest";
+      if (selectedAnswer === null) {
+        alert("Please select an answer");
+        return;
+      }
     }
+
+    // Save the answer
+    const newUserAnswers = [...userAnswers];
+    if (currentQuestion.question_type === "CB") {
+      newUserAnswers[currentQuestionIndex] = selectedAnswers;
+    } else {
+      newUserAnswers[currentQuestionIndex] = selectedAnswer;
+    }
+    setUserAnswers(newUserAnswers);
+
+    // Move to next question or submit
+    if (currentQuestionIndex < questions.length - 1) {
+      setCurrentQuestionIndex(currentQuestionIndex + 1);
+      setSelectedAnswer(null);
+      setSelectedAnswers([]);
+    } else {
+      submitTest(newUserAnswers);
+    }
+  };
+
+  const submitTest = (answers = userAnswers) => {
+    // Calculate score
+    let score = 0;
+    let totalPoints = 0;
+
+    questions.forEach((question, index) => {
+      totalPoints += question.points;
+      const userAnswer = answers[index];
+
+      if (question.question_type === "CB") {
+        // Check if all correct answers are selected and no incorrect ones
+        const correctAnswerIds = question.options
+          .filter((opt) => opt.is_correct)
+          .map((opt) => opt.answer_id);
+        
+        const isCorrect =
+          correctAnswerIds.length === userAnswer?.length &&
+          correctAnswerIds.every((id) => userAnswer.includes(id));
+
+        if (isCorrect) {
+          score += question.points;
+        }
+      } else if (question.question_type !== "DESC") {
+        const selectedOption = question.options.find(
+          (opt) => opt.answer_id === userAnswer
+        );
+        if (selectedOption?.is_correct) {
+          score += question.points;
+        }
+      }
+    });
+
+    // Store results
+    const testResults = {
+      quizData,
+      score,
+      totalPoints,
+      percentage: totalPoints > 0 ? ((score / totalPoints) * 100).toFixed(2) : 0,
+      answers: answers,
+      questions,
+    };
+
+    localStorage.setItem("testResults", JSON.stringify(testResults));
+    
+    // Navigate to completed page - FIXED PATH
+    navigate("/completed-test");
   };
 
   const handleBackToHome = () => {
-    console.log("Back to home");
-    window.location.href = "/";
+    if (window.confirm("Are you sure you want to exit? Your progress will be lost.")) {
+      navigate("/");
+    }
   };
+
+  const getQuestionTypeLabel = (type) => {
+    const labels = {
+      MC: "Multiple Choice",
+      CB: "Multiple Select",
+      TF: "True/False",
+      DESC: "Descriptive",
+    };
+    return labels[type] || "Question";
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-cyan-200 border-t-cyan-600 rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading questions...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (questions.length === 0) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">No Questions Available</h2>
+          <p className="text-gray-600 mb-6">This quiz doesn't have any questions yet.</p>
+          <button
+            onClick={() => navigate("/quiz-selection")}
+            className="px-6 py-3 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700"
+          >
+            Back to Quiz Selection
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const currentQuestion = questions[currentQuestionIndex];
 
   return (
     <div
@@ -100,7 +304,7 @@ const TestPage = () => {
                   d="M10 19l-7-7m0 0l7-7m-7 7h18"
                 />
               </svg>
-              <span className="font-normal text-base">Back to home</span>
+              <span className="font-normal text-base">Exit Test</span>
             </button>
 
             {/* Timer */}
@@ -119,65 +323,99 @@ const TestPage = () => {
           <div className="mb-8 sm:mb-10">
             <div className="flex items-center gap-3 mb-6">
               <h1 className="text-2xl sm:text-3xl font-semibold text-gray-900">
-                {questionData.category}
+                {getQuestionTypeLabel(currentQuestion.question_type)}
               </h1>
               <span className="text-cyan-600 font-normal text-lg sm:text-xl">
-                &gt; Question {currentQuestion} / {totalQuestions}
+                &gt; Question {currentQuestionIndex + 1} / {questions.length}
               </span>
             </div>
             <p className="text-gray-900 text-base sm:text-lg leading-relaxed">
-              {questionData.question}
+              {currentQuestion.question_text}
             </p>
           </div>
 
           {/* Answer Options */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-16 sm:mb-20">
-            {questionData.options.map((option) => {
-              const isSelected = selectedAnswer === option.id;
-              const isCorrect = option.correct;
+          {currentQuestion.question_type === "DESC" ? (
+            <div className="mb-16 sm:mb-20">
+              <textarea
+                value={selectedAnswer || ""}
+                onChange={(e) => setSelectedAnswer(e.target.value)}
+                placeholder="Type your answer here..."
+                rows={8}
+                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 resize-none"
+              />
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-16 sm:mb-20">
+              {currentQuestion.options.map((option) => {
+                const isSelected = currentQuestion.question_type === "CB"
+                  ? selectedAnswers.includes(option.answer_id)
+                  : selectedAnswer === option.answer_id;
 
-              return (
-                <button
-                  key={option.id}
-                  onClick={() => handleAnswerSelect(option.id)}
-                  className={`p-5 sm:p-6 rounded-lg text-left text-base sm:text-lg font-normal transition-all duration-200 border-2 ${
-                    isSelected && isCorrect
-                      ? "bg-green-50 text-black border-green-500"
-                      : isSelected && !isCorrect
-                      ? "bg-red-50 text-black border-red-500"
-                      : "bg-gray-50 text-black hover:bg-gray-100 border-gray-300"
-                  }`}
-                >
-                  <div className="flex items-start gap-3">
-                    {isSelected && isCorrect && (
-                      <img
-                        src={CorrectIcon}
-                        className="w-5 h-5 flex-shrink-0 mt-0.5"
-                        alt="correct"
-                      />
-                    )}
-                    {isSelected && !isCorrect && (
-                      <img
-                        src={WrongIcon}
-                        className="w-5 h-5 flex-shrink-0 mt-0.5"
-                        alt="wrong"
-                      />
-                    )}
-                    <span>{option.value}</span>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
+                return (
+                  <button
+                    key={option.answer_id}
+                    onClick={() => handleAnswerSelect(option.answer_id)}
+                    className={`p-5 sm:p-6 rounded-lg text-left text-base sm:text-lg font-normal transition-all duration-200 border-2 ${
+                      isSelected
+                        ? "bg-cyan-50 text-black border-cyan-500"
+                        : "bg-gray-50 text-black hover:bg-gray-100 border-gray-300"
+                    }`}
+                  >
+                    <div className="flex items-start gap-3">
+                      {currentQuestion.question_type === "CB" ? (
+                        <div
+                          className={`w-5 h-5 flex-shrink-0 mt-0.5 rounded border-2 flex items-center justify-center ${
+                            isSelected
+                              ? "bg-cyan-600 border-cyan-600"
+                              : "border-gray-400"
+                          }`}
+                        >
+                          {isSelected && (
+                            <svg
+                              className="w-3 h-3 text-white"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={3}
+                                d="M5 13l4 4L19 7"
+                              />
+                            </svg>
+                          )}
+                        </div>
+                      ) : (
+                        <div
+                          className={`w-5 h-5 flex-shrink-0 mt-0.5 rounded-full border-2 flex items-center justify-center ${
+                            isSelected
+                              ? "border-cyan-600"
+                              : "border-gray-400"
+                          }`}
+                        >
+                          {isSelected && (
+                            <div className="w-3 h-3 bg-cyan-600 rounded-full"></div>
+                          )}
+                        </div>
+                      )}
+                      <span>{option.option_text}</span>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          )}
 
           {/* Next Button */}
           <div className="flex justify-end">
             <button
               onClick={handleNext}
-              className="bg-cyan-600 hover:bg-cyan-700 text-white font-semibold px-10 sm:px-16 py-3.5 rounded-lg transition-colors duration-200 flex items-center gap-2 text-base sm:text-lg "
+              className="bg-cyan-600 hover:bg-cyan-700 text-white font-semibold px-10 sm:px-16 py-3.5 rounded-lg transition-colors duration-200 flex items-center gap-2 text-base sm:text-lg"
               style={{ boxShadow: "4px 4px 0px 0px rgba(0, 0, 0, 1)" }}
             >
-              Next
+              {currentQuestionIndex < questions.length - 1 ? "Next" : "Submit"}
               <svg
                 className="w-5 h-5"
                 fill="none"

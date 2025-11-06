@@ -1,5 +1,8 @@
 import { BrowserRouter, Routes, Route } from "react-router";
 import ApplicantOnboardingPage from "./pages/applicant/ApplicantOnboardingPage";
+import ApplicantTestPage from "./pages/applicant/TestPage";
+import QuizSelectionPage from "./pages/applicant/QuizSelectionPage";
+import CompletedTestResults from "./pages/applicant/CompletedTestResults";
 import { Toaster } from "react-hot-toast";
 import AdminProtectedRoutes from "../routes/AdminProtectedRoutes";
 import DashboardPage from "./pages/admin/DashboardPage";
@@ -22,8 +25,11 @@ function App() {
       <Toaster position="top-center" reverseOrder={false} />
       <Routes>
         {/* Applicant Routes */}
-        <Route path="/" element={<ApplicantOnboardingPage />} />
-        <Route path="/instructions" element={<TestInstructions />} />
+        <Route path="/take-quiz/:token" element={<ApplicantOnboardingPage />} />
+        <Route path="/test-instructions" element={<TestInstructions />} />
+        <Route path="/quiz-selection" element={<QuizSelectionPage />} />
+        <Route path="/completed-test" element={<CompletedTestResults />} />
+        <Route path="/test-page" element={<ApplicantTestPage />} />
         <Route path="/completed" element={<CompletedTestPage />} />
         <Route path="/auth/login" element={<LoginPage />} />
         {/* ProtectedRoutes */}
