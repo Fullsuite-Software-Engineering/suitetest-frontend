@@ -26,17 +26,30 @@ function App() {
         <Route path="/instructions" element={<TestInstructions />} />
         <Route path="/completed" element={<CompletedTestPage />} />
         <Route path="/auth/login" element={<LoginPage />} />
+
         {/* ProtectedRoutes */}
         {/* /admin protected routes */}
         <Route element={<AdminProtectedRoutes />}>
           <Route path="admin" element={<MainLayout />}>
             <Route path="dashboard" element={<DashboardPage />} />
-            <Route path="examiners" element={<TestPage />} />
-            {/* added results route */}
+
+            {/* buttons talaga ang mga yan, hindi navigation, pwede remove na to.
+            <Route path="examiners" />
+            <Route path="trainings" />
+            <Route path="assessments" /> */}
+
+            {/* examiners submenu route */}
+            <Route path="examiners/tests" element={<TestPage />} />
             <Route path="examiners/results" element={<ResultsPage />} />
-            <Route path="trainings" element={<ComingSoon />} />
-            <Route path="assessments" element={<TestBankPage />} />
-            {/*  */}
+
+            {/* trainings submenu routes */}
+            <Route path="trainings/tests" element={<ComingSoon />} />
+            <Route path="trainings/modules" element={<ComingSoon />} />
+            <Route path="trainings/progress" element={<ComingSoon />} />
+
+            {/* assessments submenu routes */}
+            <Route path="assessments/test-bank" element={<TestBankPage />} />
+            <Route path="assessments/test-builder" element={<ComingSoon />} />
             {/* <Route path="admin/applicants/results" element={<ResultsPage />} /> */}
           </Route>
         </Route>
