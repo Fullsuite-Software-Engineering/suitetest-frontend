@@ -1,10 +1,54 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import Footer from "../../components/applicant/Footer";
 
 const TestInstructions = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [quizData, setQuizData] = useState(null);
+
+  useEffect(() => {
+    // Get quiz data from navigation state or localStorage
+    const selectedQuiz = location.state?.selectedQuiz || 
+      JSON.parse(localStorage.getItem("selectedQuiz") || "null");
+    
+    const applicantData = location.state?.applicantData || 
+      JSON.parse(localStorage.getItem("applicantData") || "{}");
+
+    if (!selectedQuiz || !applicantData.department) {
+      // If no quiz selected, redirect back to quiz selection
+      navigate("/quiz-selection");
+      return;
+    }
+
+    setQuizData(selectedQuiz);
+  }, []);
+
   const handleStartTest = () => {
     console.log("Starting test...");
-    // Add your navigation logic here
+    // Navigate to the test page
+    navigate("/test-page", {
+      state: {
+        quizData,
+        applicantData: location.state?.applicantData
+      }
+    });
+  };
+
+  const handleExit = () => {
+    if (window.confirm("Are you sure you want to exit? Your progress will not be saved.")) {
+      navigate("/");
+    }
+  };
+
+  const formatTimeLimit = (minutes) => {
+    if (!minutes) return "N/A";
+    if (minutes < 60) {
+      return `${minutes} minutes`;
+    }
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    return mins > 0 ? `${hours} hour${hours > 1 ? 's' : ''} ${mins} minutes` : `${hours} hour${hours > 1 ? 's' : ''}`;
   };
 
   return (
@@ -16,7 +60,10 @@ const TestInstructions = () => {
       <div className="flex-1 flex flex-col px-6 sm:px-8 lg:px-12 py-8 sm:py-12 lg:justify-center">
         <div className="w-full max-w-3xl lg:mx-auto">
           {/* Exit Button */}
-          <button className="flex items-center gap-2 text-gray-800 hover:text-gray-600 transition-colors mb-8 sm:mb-12 lg:mb-16">
+          <button 
+            onClick={handleExit}
+            className="flex items-center gap-2 text-gray-800 hover:text-gray-600 transition-colors mb-8 sm:mb-12 lg:mb-16"
+          >
             <svg
               className="w-4 h-4 sm:w-5 sm:h-5"
               fill="none"
@@ -38,6 +85,18 @@ const TestInstructions = () => {
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-cyan-600 mb-4 sm:mb-6">
               Instructions
             </h1>
+
+            {/* Quiz Name */}
+            {quizData && (
+              <div className="mb-4">
+                <p className="text-gray-900 font-semibold text-lg">
+                  {quizData.quiz_name}
+                </p>
+                <p className="text-gray-600 text-sm">
+                  Time Limit: {formatTimeLimit(quizData.time_limit)}
+                </p>
+              </div>
+            )}
 
             <p className="text-gray-800 text-sm sm:text-base lg:text-lg leading-relaxed mb-6 sm:mb-8">
               Welcome! This short test will help us understand your current
@@ -83,7 +142,45 @@ const TestInstructions = () => {
                   />
                 </svg>
                 <span className="text-gray-800 text-sm sm:text-base">
-                  Manage your time
+                  Manage your time - Timer will start once you begin
+                </span>
+              </div>
+
+              <div className="flex items-center gap-2 sm:gap-3">
+                <svg
+                  className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 text-gray-800"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                <span className="text-gray-800 text-sm sm:text-base">
+                  Read each question carefully before answering
+                </span>
+              </div>
+
+              <div className="flex items-center gap-2 sm:gap-3">
+                <svg
+                  className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 text-gray-800"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                  />
+                </svg>
+                <span className="text-gray-800 text-sm sm:text-base">
+                  You cannot go back to previous questions
                 </span>
               </div>
             </div>
