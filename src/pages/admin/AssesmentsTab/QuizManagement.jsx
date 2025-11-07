@@ -314,8 +314,8 @@ const QuizManagement = ({ department, onBack }) => {
 
       {/* Add Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl p-8 max-w-md w-full shadow-2xl">
+        <div className="fixed inset-0 bg-blur bg-opacity-50  backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
+          <div className="bg-white rounded-xl p-8 max-w-md w-full shadow-2xl transform animate-in zoom-in-95 duration-200">
             <h2 className="text-2xl font-bold text-gray-900 mb-6">
               Add New Quiz
             </h2>
@@ -376,8 +376,8 @@ const QuizManagement = ({ department, onBack }) => {
 
       {/* Edit Modal */}
       {showEditModal && editingQuiz && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl p-8 max-w-md w-full shadow-2xl">
+        <div className="fixed inset-0 bg-blur bg-opacity-100 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
+          <div className="bg-white rounded-xl p-8 max-w-md w-full shadow-2xl transform animate-in zoom-in-95 duration-200">
             <h2 className="text-2xl font-bold text-gray-900 mb-6">Edit Quiz</h2>
             <div className="space-y-4">
               <div>
@@ -444,8 +444,8 @@ const QuizManagement = ({ department, onBack }) => {
 
       {/* Delete Confirmation Modal */}
       {showDeleteModal && deletingQuiz && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl p-8 max-w-md w-full shadow-2xl">
+        <div className="fixed inset-0 bg-blur bg-opacity-50 flex backdrop-blur-sm items-center justify-center p-4 z-50 animate-in fade-in duration-200">
+          <div className="bg-white rounded-xl p-8 max-w-md w-full shadow-2xl transform animate-in zoom-in-95 duration-200">
             <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <Trash2 size={28} className="text-red-600" />
             </div>
@@ -482,8 +482,8 @@ const QuizManagement = ({ department, onBack }) => {
 
       {/* Invite Link Modal */}
       {showInviteModal && selectedQuizForInvite && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl p-8 max-w-md w-full shadow-2xl">
+        <div className="fixed inset-0 bg-blur bg-opacity-50 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
+          <div className="bg-white rounded-xl p-8 max-w-md w-full shadow-2xl transform animate-in zoom-in-95 duration-200">
             <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <LinkIcon size={28} className="text-emerald-600" />
             </div>
@@ -507,6 +507,20 @@ const QuizManagement = ({ department, onBack }) => {
                     placeholder="Enter email address"
                     className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                     onKeyPress={(e) => e.key === "Enter" && handleGenerateInvite()}
+                    autoFocus
+                  />
+                  {/* edit for time */}
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Expiration
+                  </label>
+                  <input
+                    type="number"
+                    value={inviteEmail}
+                    onChange={(e) => setInviteEmail(e.target.value)}
+                    placeholder="Enter Expiration Time(Hours)"
+                    min={1}
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                    // onKeyPress={(e) => e.key === "Enter" && handleGenerateInvite()}
                     autoFocus
                   />
                 </div>

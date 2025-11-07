@@ -7,6 +7,7 @@ import toast from 'react-hot-toast';
 import axios from 'axios';
 import { useMediaQuery } from '@mui/material'
 import { getAllResults } from '../../../../api/api';
+import { Search } from 'lucide-react';
 
 function ResultsPage() {
 
@@ -57,6 +58,23 @@ function ResultsPage() {
   }
 };
 
+//searching
+const handleSearch = (query) => {
+  if (!query) {
+    fetchAllTests();
+    return;
+  }
+
+  const filteredData = data.filter((item) =>
+    Object.values(item).some(
+      (value) =>
+        value &&
+        value.toString().toLowerCase().includes(query.toLowerCase())
+    )
+  );
+  setData(filteredData);
+}
+
 
   useEffect( () => {
     fetchAllTests()
@@ -75,7 +93,15 @@ function ResultsPage() {
           </div>
           <div className='flex gap-4 mb-4'>
             {/* searchbar */}
-            <input type="text" name="search" id="search" placeholder='Search' className='border border-[#D1D1D1] hover:border-[#2E99B0] p-3 rounded-lg w-full bg-white '/>
+             <div className="relative w-full mr-4">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#2E99B0]" />
+                  <input
+                      type="text"
+                      placeholder="Search"
+                      onChange={(e) => handleSearch(e.target.value)}
+                      className="border border-[#D1D1D1] group-hover:border-[#2E99B0] p-3 pl-10 rounded-lg w-full bg-white focus:outline-none"
+                  />
+              </div>
             {/* buttons */}
             <FilterButton />
             <ExportButton />
