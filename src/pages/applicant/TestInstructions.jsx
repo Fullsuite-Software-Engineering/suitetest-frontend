@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import Footer from "../../components/applicant/Footer";
+import { Navigate, useNavigate } from "react-router";
 
 const TestInstructions = () => {
   const navigate = useNavigate();
