@@ -532,16 +532,16 @@ const TestBankPage = () => {
 
       {/* Add Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
+        <div className="fixed inset-0 bg-blur bg-opacity-50 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
           <div className="bg-white rounded-2xl p-6 lg:p-8 max-w-md w-full mx-4 shadow-2xl transform animate-in zoom-in-95 duration-200">
-            <h2 className="text-xl lg:text-2xl font-bold text-gray-900 mb-4 lg:mb-6">
+            <h2 className="text-xl lg:text-2xl font-bold text-[#2E99B0] mb-4 lg:mb-6">
               Add New Department
             </h2>
             <input
               type="text"
               value={newDeptName}
               onChange={(e) => setNewDeptName(e.target.value)}
-              placeholder="Enter department name"
+              placeholder="Enter Department"
               className="w-full px-4 py-3 text-sm lg:text-base border-2 border-gray-200 rounded-xl mb-4 lg:mb-6 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all"
               onKeyPress={(e) => e.key === "Enter" && handleAddDepartment()}
               autoFocus
