@@ -105,4 +105,4 @@ function TestsPage() {
   )
 }
 
-export default AdminTestsPage
+export default TestsPage

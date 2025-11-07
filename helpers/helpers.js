@@ -13,3 +13,27 @@
     year: "numeric",
   }),
 });
+
+export const transformExaminers = (examiner) => ({
+    id: examiner.examiner_id,
+    examiner_name: `${examiner.first_name} ${examiner.last_name}`,
+    department: examiner.Department?.dept_name || "N/A",
+    email: examiner.email,
+    date: new Date(examiner.created_at).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    }),
+  });
+
+  
+export const filteredDepartments = (departments, searchTerm, filterActive) => departments.filter((dept) => {
+    const matchesSearch = dept.dept_name
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
+    const matchesFilter =
+      filterActive === "all" ||
+      (filterActive === "active" && dept.is_active) ||
+      (filterActive === "inactive" && !dept.is_active);
+    return matchesSearch && matchesFilter;
+  });
