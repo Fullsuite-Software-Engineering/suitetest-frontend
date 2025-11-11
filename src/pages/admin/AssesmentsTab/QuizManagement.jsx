@@ -25,6 +25,7 @@ const QuizManagement = ({ department, onBack }) => {
   const [deletingQuiz, setDeletingQuiz] = useState(null);
   const [selectedQuizForInvite, setSelectedQuizForInvite] = useState(null);
   const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteExpiration, setInviteExpiration] = useState("");
   const [generatedLink, setGeneratedLink] = useState("");
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState(null);
@@ -48,7 +49,9 @@ const QuizManagement = ({ department, onBack }) => {
   const fetchQuizzes = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${API_BASE_URL}/get/${department.dept_id}`);
+      const response = await axios.get(
+        `${API_BASE_URL}/get/${department.dept_id}`
+      );
       setQuizzes(response.data.data || []);
       setError(null);
     } catch (err) {
@@ -63,14 +66,11 @@ const QuizManagement = ({ department, onBack }) => {
     if (!newQuiz.quiz_name.trim() || !newQuiz.time_limit) return;
 
     try {
-      await axios.post(
-        `${API_BASE_URL}/${department.dept_id}/create`,
-        {
-          dept_id: department.dept_id,
-          quiz_name: newQuiz.quiz_name,
-          time_limit: parseInt(newQuiz.time_limit),
-        }
-      );
+      await axios.post(`${API_BASE_URL}/${department.dept_id}/create`, {
+        dept_id: department.dept_id,
+        quiz_name: newQuiz.quiz_name,
+        time_limit: parseInt(newQuiz.time_limit),
+      });
 
       await fetchQuizzes();
       setNewQuiz({ quiz_name: "", time_limit: "" });
@@ -83,7 +83,12 @@ const QuizManagement = ({ department, onBack }) => {
   };
 
   const handleUpdateQuiz = async () => {
-    if (!editingQuiz || !editingQuiz.quiz_name.trim() || !editingQuiz.time_limit) return;
+    if (
+      !editingQuiz ||
+      !editingQuiz.quiz_name.trim() ||
+      !editingQuiz.time_limit
+    )
+      return;
 
     try {
       await axios.put(
@@ -128,6 +133,7 @@ const QuizManagement = ({ department, onBack }) => {
     try {
       const response = await axios.post(`${INVITE_API_BASE_URL}/generate`, {
         email: inviteEmail,
+        expiration: inviteExpiration,
         quiz_id: selectedQuizForInvite.quiz_id,
         dept_id: department.dept_id,
       });
@@ -135,7 +141,9 @@ const QuizManagement = ({ department, onBack }) => {
       setGeneratedLink(response.data.data.link);
       setError(null);
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to generate invitation link");
+      setError(
+        err.response?.data?.message || "Failed to generate invitation link"
+      );
       console.error("Error generating invitation:", err);
     }
   };
@@ -232,8 +240,8 @@ const QuizManagement = ({ department, onBack }) => {
               <div
                 onClick={() => {
                   // stopPropagation();
-                  setSelectedQuiz(quiz)}
-                  }
+                  setSelectedQuiz(quiz);
+                }}
                 key={quiz.quiz_id}
                 className="bg-white rounded-xl border border-gray-200 p-5 hover:shadow-md transition-shadow relative"
               >
@@ -292,10 +300,11 @@ const QuizManagement = ({ department, onBack }) => {
                 {/* <div className="h-24 mb-4"></div> */}
 
                 <div className="flex items-center justify-end gap-2 pt-4 border-t border-gray-100">
-                  <button 
+                  <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      openInviteModal(quiz)}}
+                      openInviteModal(quiz);
+                    }}
                     className="flex items-center gap-2 bg-[#2E99B0] text-white px-4 py-1.5 rounded-lg text-sm font-medium transition-colors hover:bg-emerald-700"
                   >
                     <LinkIcon size={18} />
@@ -499,7 +508,7 @@ const QuizManagement = ({ department, onBack }) => {
             <p className="text-gray-600 text-center mb-6">
               {selectedQuizForInvite.quiz_name}
             </p>
-            
+
             {!generatedLink ? (
               <div className="space-y-4">
                 <div>
@@ -512,7 +521,9 @@ const QuizManagement = ({ department, onBack }) => {
                     onChange={(e) => setInviteEmail(e.target.value)}
                     placeholder="Enter email address"
                     className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                    onKeyPress={(e) => e.key === "Enter" && handleGenerateInvite()}
+                    onKeyPress={(e) =>
+                      e.key === "Enter" && handleGenerateInvite()
+                    }
                     autoFocus
                   />
                   {/* edit for time */}
@@ -521,12 +532,14 @@ const QuizManagement = ({ department, onBack }) => {
                   </label>
                   <input
                     type="number"
-                    // value={inviteEmail}
-                    // onChange={(e) => setInviteEmail(e.target.value)}
+                    value={inviteExpiration}
+                    onChange={(e) => setInviteExpiration(e.target.value)}
                     placeholder="Enter Expiration Time(Hours)"
                     min={1}
                     className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                    // onKeyPress={(e) => e.key === "Enter" && handleGenerateInvite()}
+                    onKeyPress={(e) =>
+                      e.key === "Enter" && handleGenerateInvite()
+                    }
                     autoFocus
                   />
                 </div>
