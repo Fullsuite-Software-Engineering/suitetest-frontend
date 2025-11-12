@@ -13,6 +13,7 @@ function AbandonTracker({ children, examiner_id = 1, quiz_id = 1 }) {
       const abandonData = {
         examiner_id,
         quiz_id,
+        answers: [],
         status: "ABANDONED",
         created_at: Date.now(),
       };
