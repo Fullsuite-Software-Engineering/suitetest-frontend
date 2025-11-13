@@ -141,25 +141,19 @@ const CompletedTestResults = () => {
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h1 className="text-2xl font-bold">{quizData.quiz_name}</h1>
-                <p className="text-white/80 text-sm">
-                  Test Completed Successfully
-                </p>
+
               </div>
               <div className="flex items-center gap-2 bg-white/20 px-3 py-1 rounded-full">
                 <span className="text-sm font-medium">Completed</span>
               </div>
             </div>
 
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-start">
               <div className="flex items-baseline gap-3">
                 <div className="text-5xl font-black">{percentage}%</div>
                 <div className="text-white/80 text-lg">/ 100%</div>
               </div>
-              <div
-                className={`px-4 py-2 rounded-full ${performance.bg} ${performance.color} font-bold text-sm`}
-              >
-                {performance.level}
-              </div>
+         
             </div>
           </div>
 
@@ -172,24 +166,7 @@ const CompletedTestResults = () => {
               </div>
               <div className="text-[#2E99B0] text-sm">Points</div>
             </div>
-            <div className="bg-white border border-gray-200 rounded-xl p-4 text-center shadow-sm hover:shadow-md transition-shadow">
-              <FileText className="w-8 h-8 text-[#217486] mx-auto mb-2" />
-              <div className="text-xl font-bold text-gray-900">
-                {questions.length}
-              </div>
-              <div className="text-[#2E99B0] text-sm">Questions</div>
-            </div>
-            <div className="bg-white border border-gray-200 rounded-xl p-4 text-center shadow-sm hover:shadow-md transition-shadow">
-              <Clock className="w-8 h-8 text-purple-500 mx-auto mb-2" />
-              <div className="text-xl font-bold text-gray-900">
-                {quizData.time_limit}
-              </div>
-              <div className="text-[#2E99B0] text-sm">Minutes</div>
-            </div>
-          </div>
-
-          {/* Additional Stats */}
-          <div className="grid grid-cols-3 gap-4 mb-6">
+        
             <div className="bg-white border border-gray-200 rounded-xl p-4 text-center shadow-sm">
               <CheckCircle2 className="w-6 h-6 text-green-600 mx-auto mb-2" />
               <div className="text-xl font-bold text-green-600">
@@ -203,13 +180,6 @@ const CompletedTestResults = () => {
                 {incorrectAnswers}
               </div>
               <div className="text-[#2E99B0] text-sm">Incorrect</div>
-            </div>
-            <div className="bg-white border border-gray-200 rounded-xl p-4 text-center shadow-sm">
-              <AlertCircle className="w-6 h-6 text-amber-600 mx-auto mb-2" />
-              <div className="text-xl font-bold text-amber-600">
-                {descriptiveQuestions}
-              </div>
-              <div className="text-[#2E99B0] text-sm">For Review</div>
             </div>
           </div>
 

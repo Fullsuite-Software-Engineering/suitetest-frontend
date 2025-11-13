@@ -396,13 +396,27 @@ const QuestionManagement = ({ quiz, onBack }) => {
         >
           <ArrowLeft /> Back
         </button>
-        <button
-          onClick={openAdd}
-          className="flex items-center gap-2 px-5 py-3 bg-[#2E99B0] text-white rounded-lg"
-        >
-          <Plus /> Add Question
-        </button>
       </div>
+
+      <div className="mb-8">
+        <div className="flex justify-between items-start mb-2">
+          <div>
+            <h1 className="text-3xl text-[#2E99B0] mb-1">
+              {quiz.quiz_name}
+            </h1>
+            <p>List of Questions:</p>
+          </div>
+        
+          <button
+            onClick={openAdd}
+            className="flex items-center gap-2 px-5 py-3 bg-[#2E99B0] text-white rounded-lg"
+          >
+            <Plus /> Add Question
+          </button>
+        </div>
+      </div>
+        
+      
 
       {loading ? (
         <div className="text-center py-10">Loading...</div>
@@ -421,6 +435,7 @@ const QuestionManagement = ({ quiz, onBack }) => {
                   {q.points} {q.points === 1 ? "point" : "points"} •{" "}
                   {q.question_type}
                 </div>
+                Choices:
                 {q.options.map((opt, j) => (
                   <div
                     key={j}
