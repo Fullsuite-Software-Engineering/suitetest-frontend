@@ -148,11 +148,9 @@ const QuestionModal = ({ isOpen, onClose, question, setQuestion, onSave }) => {
         );
 
       default:
-         return (
-            <p className="text-gray-500 italic">
-              Unsupported question type.
-            </p>
-          );
+        return (
+          <p className="text-gray-500 italic">Unsupported question type.</p>
+        );
     }
   };
 
@@ -167,8 +165,7 @@ const QuestionModal = ({ isOpen, onClose, question, setQuestion, onSave }) => {
           { option_text: "False", is_correct: false },
         ],
       }));
-    } 
-    else if (newType === "MC" || newType === "CB") {
+    } else if (newType === "MC" || newType === "CB") {
       setQuestion((prev) => ({
         ...prev,
         options: [
@@ -176,7 +173,7 @@ const QuestionModal = ({ isOpen, onClose, question, setQuestion, onSave }) => {
           { option_text: "", is_correct: false },
         ],
       }));
-    }else{
+    } else {
       setQuestion((prev) => ({
         ...prev,
         options: [],
@@ -581,7 +578,10 @@ const QuestionManagement = ({ quiz, onBack }) => {
           </div>
         ) : questions.length === 0 ? (
           <div className="bg-white rounded-xl shadow-sm p-12 text-center">
-            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <div
+              className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4"
+              onClick={openAddModal}
+            >
               <Plus className="w-8 h-8 text-gray-400" />
             </div>
             <h3 className="text-lg font-semibold text-gray-900 mb-2">

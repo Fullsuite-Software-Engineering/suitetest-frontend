@@ -1,12 +1,12 @@
-import { useEffect, useState } from 'react';
-import ExportButton from '../../../components/admin/ExportButton';
-import FilterButton from '../../../components/admin/FilterButton';
+import { useEffect, useState } from "react";
+import ExportButton from "../../../components/admin/ExportButton";
+import FilterButton from "../../../components/admin/FilterButton";
 import ExaminersTable from "../../../components/admin/ExaminersTable";
-import MobileScrollableCards from '../../../components/admin/MobileScrollableCards';
-import toast from 'react-hot-toast';
-import { useMediaQuery } from '@mui/material';
-import { getAllResults } from '../../../../api/api';
-import { Search } from 'lucide-react';
+import MobileScrollableCards from "../../../components/admin/MobileScrollableCards";
+import toast from "react-hot-toast";
+import { useMediaQuery } from "@mui/material";
+import { getAllResults } from "../../../../api/api";
+import { Search } from "lucide-react";
 
 function ResultsPage() {
   const [data, setData] = useState([]);
@@ -60,9 +60,9 @@ function ResultsPage() {
     }
 
     const filtered = allData.filter((item) =>
-      Object.values(item).some((value) =>
-        value &&
-        value.toString().toLowerCase().includes(query.toLowerCase())
+      Object.values(item).some(
+        (value) =>
+          value && value.toString().toLowerCase().includes(query.toLowerCase())
       )
     );
 
@@ -74,15 +74,14 @@ function ResultsPage() {
   }, []);
 
   return (
-    <div className='h-screen w-full px-3 sm:px-6 md:px-8 py-6'>
-      <div className='mb-20'>
-        <h1 className="text-[#2E99B0] text-md sm:text-md md:text-xl lg:text-2xl xl:text-3xl">
+    <div className="h-screen w-full px-3 sm:px-6 md:px-8 py-6 mt-20 sm:mt-0">
+      <div className="mb-5 md:mt-20">
+        <div className="text-[#2E99B0] text-md sm:text-md md:text-xl lg:text-2xl xl:text-3xl">
           Results
-        </h1>
-        <p>This table is for test results</p>
+        </div>
       </div>
 
-      <div className='flex gap-4 mb-4'>
+      <div className="flex gap-4 mb-4">
         {/* Search bar */}
         <div className="relative w-full mr-4">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#2E99B0]" />
@@ -122,7 +121,9 @@ function ResultsPage() {
             />
           </svg>
           <p className="text-slate-600 font-medium">No Candidates Found</p>
-          <p className="text-slate-400 text-sm">Please check back later or add new candidates.</p>
+          <p className="text-slate-400 text-sm">
+            Please check back later or add new candidates.
+          </p>
         </div>
       ) : (
         <div className="rounded-lg shadow-md bg-white overflow-x-auto">
