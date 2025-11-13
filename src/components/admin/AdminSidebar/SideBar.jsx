@@ -40,80 +40,9 @@ const AdminSidebar = () => {
           )}
         />
 
-        {/* <SidebarLink
-          to=""
-          label="Examiners"
-          icon={(active) => (
-            <User
-              className={`h-5 w-5 ${active ? "text-white" : "text-[#2E99B0]"}`}
-            />
-          )}
-          isOpen={openApplicants}
-          toggleOpen={() => setOpenApplicants(!openApplicants)}
-        />
-        {openApplicants && (
-          <SidebarSubmenu
-            isOpen={openApplicants}
-            items={[
-              {
-                icon: <Layers2 className="h-4 w-4 hidden sm:flex" />,
-                label: "Tests",
-                to: "/admin/examiners/tests",
-              },
-              {
-                icon: <NotepadText className="h-4 w-4 hidden sm:flex" />,
-                label: "Results",
-                to: "/admin/examiners/results",
-              },
-            ]}
-          />
-        )} */}
-
-        {/* <div
-          onClick={toggleOpen}
-          className={`flex items-center justify-center sm:justify-between w-full cursor-pointer  transition-colors ${
-            openApplicants
-              ? " text-white rounded-xl"
-              : "hover:bg-gray-100 text-[#2E99B0]"
-          }`}
-        >
-          <SidebarLink
-            to=""
-            label="Examiners"
-            icon={(active) => (
-              <User
-                className={`h-5 w-5 ${
-                  (active ? "text-white" : "text-[#2E99B0]",
-                  active ? "bg-[#2E99B0]" : "")
-                }`}
-              />
-            )}
-            isOpen={openApplicants}
-            toggleOpen={openApplicants}
-          />
-        </div> */}
-
-        {/* Submenu Items */}
-        {/* {openApplicants && (
-          <SidebarSubmenu
-            isOpen={openApplicants}
-            items={[
-              {
-                icon: <Layers2 className="h-4 w-4 hidden sm:flex" />,
-                label: "Tests",
-                to: "/admin/examiners/tests",
-              },
-              {
-                icon: <NotepadText className="h-4 w-4 hidden sm:flex" />,
-                label: "Results",
-                to: "/admin/examiners/results",
-              },
-            ]}
-          />
-        )} */}
         <SidebarLink
-          to="" // no navigation
-          label="Examiners"
+          to=""
+          label="Examinees"
           icon={(active) => (
             <User
               className={`h-5 w-5 ${active ? "text-white" : "text-[#2E99B0]"}`}
@@ -129,7 +58,7 @@ const AdminSidebar = () => {
             items={[
               {
                 icon: <Layers2 className="h-4 w-4 hidden sm:flex" />,
-                label: "Tests",
+                label: "Examinee List",
                 to: "/admin/examiners/tests",
               },
               {
@@ -140,42 +69,6 @@ const AdminSidebar = () => {
             ]}
           />
         )}
-
-{/* removed */}
-        {/* <SidebarLink
-          // to="/admin/trainings"
-          label="Trainings"
-          icon={(active) => (
-            <Captions
-              className={`h-5 w-5 ${active ? "text-white" : "text-[#2E99B0]"}`}
-            />
-          )}
-          isOpen={openTrainings}
-          toggleOpen={() => setOpenTrainings(!openTrainings)}
-        />
-        {openTrainings && (
-          <SidebarSubmenu
-            isOpen={openTrainings}
-            items={[
-              {
-                icon: <NotepadText className="h-4 w-4 hidden sm:flex" />,
-                label: "Tests",
-                to: "/admin/trainings/tests",
-              },
-              {
-                icon: <Package className="h-4 w-4 hidden sm:flex " />,
-                label: "Modules",
-                to: "/admin/trainings/modules",
-              },
-
-              {
-                icon: <ArrowUpNarrowWide className="h-4 w-4 hidden sm:flex" />,
-                label: "Progress",
-                to: "/admin/trainings/progress",
-              },
-            ]}
-          />
-        )} */}
 
         <SidebarLink
           // to="/admin/assessments"
@@ -197,11 +90,6 @@ const AdminSidebar = () => {
                 label: "Test Bank",
                 to: "/admin/assessments/test-bank",
               },
-              // {
-              //   icon: <BrickWall className="h-4 w-4 hidden sm:flex" />,
-              //   label: "Test Builder",
-              //   to: "/admin/assessments/test-builder",
-              // },
             ]}
           />
         )}
