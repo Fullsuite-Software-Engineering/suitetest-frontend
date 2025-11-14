@@ -20,9 +20,30 @@ function ExamsDashboard() {
           lg:22
         }
       }}>
-        <Tabs value={activeTab} onChange={handleTabChange} aria-label="exams tabs">
-          <Tab label="Examinees" />
-          <Tab label="Results" />
+        <Tabs 
+          value={activeTab} 
+          onChange={handleTabChange} 
+          aria-label="exams tabs" 
+          sx={{
+              "& .MuiTabs-indicator": {
+                backgroundColor: "#3A91AC",
+                height: 3,
+              },
+            }}>
+          <Tab label="Examinees" sx={{
+            color: '#3A91AC', 
+            "&.Mui-selected": {
+              color: '#3A91AC', 
+              fontWeight: 'bold', 
+            },
+          }}/>
+          <Tab label="Results"sx={{
+            color: '#3A91AC', 
+            "&.Mui-selected": {
+              color: '#3A91AC',
+              fontWeight: 'bold', 
+            },
+          }}/>
         </Tabs>
       </Box>
 
