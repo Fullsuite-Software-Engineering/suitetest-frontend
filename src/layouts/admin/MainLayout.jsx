@@ -1,8 +1,6 @@
 import { Outlet } from "react-router";
-import BottomNav from "../../components/admin/AdminSidebar/BottomNav";
+import BottomNav from "../../components/admin/BottomNav";
 import { useState } from "react";
-// import { LayoutDashboardIcon, LibraryBigIcon, ListCheckIcon, LogOutIcon, Menu, User2Icon, X } from "lucide-react";
-// import AdminTopBar from "../../components/admin/AdminSidebar/AdminMobile/AdminTopBar";
 
 function MainLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);

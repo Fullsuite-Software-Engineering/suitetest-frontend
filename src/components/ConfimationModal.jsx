@@ -17,8 +17,8 @@ const ConfirmationModal = ({
     >
       {/* Modal Container */}
       <div
-        className="bg-white rounded-2xl p-6 sm:p-8 w-full max-w-md  animate-fadeIn"
-        style={{ boxShadow: "5px 5px 0px 0px rgba(0, 0, 0, 1)" }}
+        className="bg-white rounded-2xl p-6 sm:p-8 w-full max-w-md  animate-fadeIn border-2 border-black"
+        style={{ boxShadow: "4px 4px 0px 0px rgba(0, 0, 0, 1)" }}
       >
         {/* Icon */}
         <div className="flex justify-center mb-4">
@@ -59,7 +59,7 @@ const ConfirmationModal = ({
                   className="flex items-start gap-2 text-sm text-gray-700"
                 >
                   <svg
-                    className="w-5 h-5 text-cyan-600 flex-shrink-0 mt-0.5"
+                    className="w-5 h-5 text-cyan-600 shrink-0 mt-0.5"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"

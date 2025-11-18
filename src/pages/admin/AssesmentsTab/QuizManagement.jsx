@@ -15,6 +15,7 @@ import {
   Users,
 } from "lucide-react";
 import QuestionManagement from "./QuestionManagement";
+import toast from "react-hot-toast";
 
 const QuizManagement = ({ department, onBack }) => {
   const [quizzes, setQuizzes] = useState([]);
@@ -82,11 +83,13 @@ const QuizManagement = ({ department, onBack }) => {
 
       await fetchQuizzes();
       setNewQuiz({ quiz_name: "", time_limit: "" });
+      toast.success("Quiz Added!");
       setShowAddModal(false);
       setError(null);
     } catch (err) {
       setError(err.response?.data?.message || "Failed to create quiz");
       console.error("Error creating quiz:", err);
+      toast.error("Quiz Creation Failed!");
     }
   };
 
@@ -108,30 +111,32 @@ const QuizManagement = ({ department, onBack }) => {
       );
 
       await fetchQuizzes();
+      toast.success("Quiz Updated!");
       setShowEditModal(false);
       setEditingQuiz(null);
       setError(null);
     } catch (err) {
       setError(err.response?.data?.message || "Failed to update quiz");
       console.error("Error updating quiz:", err);
+      toast.error("Quiz Update Failed!");
     }
   };
 
   const handleDeleteQuiz = async () => {
     if (!deletingQuiz) return;
-
     try {
       await axios.delete(
         `${API_BASE_URL}/${department.dept_id}/delete/${deletingQuiz.quiz_id}`
       );
-
       await fetchQuizzes();
+      toast.success("Quiz Deleted!");
       setShowDeleteModal(false);
       setDeletingQuiz(null);
       setError(null);
     } catch (err) {
       setError(err.response?.data?.message || "Failed to delete quiz");
       console.error("Error deleting quiz:", err);
+      toast.error("Quiz Deletion Failed!")
     }
   };
 
@@ -266,7 +271,7 @@ const QuizManagement = ({ department, onBack }) => {
                 key={quiz.quiz_id}
                 className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all border border-gray-100 overflow-hidden group"
               >
-                <div className="bg-gradient-to-br from-[#217486] to-[#2a8fa5] p-5">
+                <div className="bg-linear-to-br from-[#217486] to-[#2a8fa5] p-5">
                   <div className="flex justify-between items-start mb-3">
                     <h3 className="text-xl font-bold text-white flex-1 pr-2 leading-tight">
                       {quiz.quiz_name}
@@ -343,6 +348,8 @@ const QuizManagement = ({ department, onBack }) => {
                         e.stopPropagation();
                         openInviteModal(quiz);
                       }}
+                      //added disabled if there is no existing question
+                      // disabled={}
                       className="flex-1 flex items-center justify-center gap-2 bg-[#217486] hover:bg-[#1a5d6d] text-white px-4 py-2.5 rounded-lg text-sm font-medium transition-all shadow-md shadow-[#217486]/30"
                     >
                       <LinkIcon className="w-4 h-4" />
@@ -360,7 +367,7 @@ const QuizManagement = ({ department, onBack }) => {
       {showAddModal && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden">
-            <div className="bg-gradient-to-r from-[#217486] to-[#2a8fa5] p-6">
+            <div className="bg-linear-to-r from-[#217486] to-[#2a8fa5] p-6">
               <h2 className="text-2xl font-bold text-white">Create New Quiz</h2>
               <p className="text-white/80 text-sm mt-1">Add a new quiz to your department</p>
             </div>
@@ -425,7 +432,7 @@ const QuizManagement = ({ department, onBack }) => {
       {showEditModal && editingQuiz && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden">
-            <div className="bg-gradient-to-r from-[#217486] to-[#2a8fa5] p-6">
+            <div className="bg-linear-to-r from-[#217486] to-[#2a8fa5] p-6">
               <h2 className="text-2xl font-bold text-white">Edit Quiz</h2>
               <p className="text-white/80 text-sm mt-1">Update quiz information</p>
             </div>
@@ -536,7 +543,7 @@ const QuizManagement = ({ department, onBack }) => {
       {showInviteModal && selectedQuizForInvite && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden">
-            <div className="bg-gradient-to-r from-[#217486] to-[#2a8fa5] p-6">
+            <div className="bg-linear-to-r from-[#217486] to-[#2a8fa5] p-6">
               <div className="flex items-center gap-3 mb-2">
                 <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
                   <LinkIcon className="w-6 h-6 text-white" />
