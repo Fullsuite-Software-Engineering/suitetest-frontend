@@ -396,28 +396,19 @@ const ApplicantTestPage = () => {
             </div>
       </div>
 
-      
-
       {/* Main Content */}
-      
       <div className="flex flex-col justify-center mx-5 sm:mx-10 lg:mx-30 xl:mx-100 sm:px-8 lg:px-16 py-8 sm:py-12">
-
          {/* Header */}
-          
           <div className="flex flex-col mb-5 gap-10"> 
-
-
-         <Stack spacing={2} className="mb-10 sm:mb-10">
-           <Breadcrumbs separator=">">
-           { breadcrumbs }
-          </Breadcrumbs>
-          <Typography key="2" sx={{ color: 'text-base' }}fontSize={25} fontWeight={'bold'}>
-            {currentQuestion.question_text}
-          </Typography>
-         </Stack>
+            <Stack spacing={2} className="mb-10 sm:mb-10">
+              <Breadcrumbs separator=">">
+              { breadcrumbs }
+              </Breadcrumbs>
+              <Typography key="2" sx={{ color: 'text-base' }}fontSize={25} fontWeight={'bold'}>
+                {currentQuestion.question_text}
+              </Typography>
+            </Stack>
           </div>
-
-      
             <div className="flex flex-col gap-10">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-16 sm:mb-20">
               {currentQuestion.options.map((option) => {
@@ -425,7 +416,6 @@ const ApplicantTestPage = () => {
                   currentQuestion.question_type === "CB"
                     ? selectedAnswers.includes(option.answer_id)
                     : selectedAnswer === option.answer_id;
-
                 return (
                   <button
                     key={option.answer_id}
