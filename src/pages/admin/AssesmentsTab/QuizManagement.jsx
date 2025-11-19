@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import QuestionManagement from "./QuestionManagement";
 import toast from "react-hot-toast";
-import { getQuizzes, addQuiz, deleteQuiz, generateInviteLink } from "../../../../api/api";
+import { getQuizzes, addQuiz, deleteQuiz, editQuiz, generateInviteLink } from "../../../../api/api";
 
 const QuizManagement = ({ department, onBack }) => {
   const [quizzes, setQuizzes] = useState([]);
@@ -105,7 +105,7 @@ const QuizManagement = ({ department, onBack }) => {
           time_limit: parseInt(editingQuiz.time_limit),
         }
       
-      await editingQuiz(department.dept_id, quiz.quiz_id, payload)
+      await editQuiz(department.dept_id, editingQuiz.quiz_id, payload)
 
       await fetchQuizzes();
       toast.success("Quiz Updated!");
@@ -122,7 +122,7 @@ const QuizManagement = ({ department, onBack }) => {
   const handleDeleteQuiz = async () => {
     if (!deletingQuiz) return;
     try {
-      await deleteQuiz(department.dept_id, deleteQuiz.quiz_id)
+      await deleteQuiz(department.dept_id, deletingQuiz.quiz_id)
       await fetchQuizzes();
       toast.success("Quiz Deleted!");
       setShowDeleteModal(false);
