@@ -1,4 +1,15 @@
 import React, { useState, useEffect } from "react";
+import axios from "axios";
+import {
+  Clock,
+  Plus,
+  Edit2,
+  Trash2,
+  X,
+  ArrowLeft,
+  CheckCircle,
+  Circle,
+} from "lucide-react";
 import { Plus, Edit2, Trash2, X, ArrowLeft, CheckCircle, Circle } from "lucide-react";
 import toast from "react-hot-toast";
 import { addAnswer, addQuestion, deleteAnswer, deleteQuestion, getAnswer, getQuestions, updateAnswer, updateQuestion } from "../../../../api/api";
@@ -84,7 +95,9 @@ const QuestionModal = ({ isOpen, onClose, question, setQuestion, onSave }) => {
                   onChange={() => setCorrectAnswer(i)}
                   className="w-4 h-4 text-[#217486] focus:ring-[#217486] shrink-0"
                 />
-                <span className="font-medium text-gray-700 text-sm sm:text-base">{opt.option_text}</span>
+                <span className="font-medium text-gray-700">
+                  {opt.option_text}
+                </span>
               </div>
             ))}
           </div>
@@ -343,12 +356,12 @@ const QuestionManagement = ({ quiz, onBack }) => {
     try {
       await deleteQuestion(quiz.quiz_id, question.question_id)
       //added toast
-      toast.success("Question Deleted!")
+      toast.success("Question Deleted!");
       setDeleteModalOpen(false);
       fetchQuestions();
     } catch (err) {
       console.error("Delete error:", err);
-      toast.error("Question Deletion Failed!")
+      toast.error("Question Deletion Failed!");
     }
   };
 
@@ -356,6 +369,12 @@ const QuestionManagement = ({ quiz, onBack }) => {
     const q = currentQuestion;
     if (!q.question_text.trim()) return toast.error("Question text required");
 
+    //added to check if the options are empty
+    if (q.question_type === "MC" || q.question_type === "CB") {
+      if (!q.options || q.options.length < 2) {
+        return toast.error("At least 2 options are required");
+      }
+      // Also check that all options have text
     if ((q.question_type === "MC" || q.question_type === "CB")) {
       if (!q.options || q.options.length < 2) {
         return toast.error("At least 2 options are required");
@@ -370,7 +389,7 @@ const QuestionManagement = ({ quiz, onBack }) => {
     if (editingIndex !== null) {
       await updateQuestion(quiz.quiz_id, q.question_id, q)
       //added updated toast
-      toast.success("Question Updated!")
+      toast.success("Question Updated!");
       const original = questions[editingIndex];
       const originalIds = original.options
         .map((o) => o.answer_id)
@@ -378,7 +397,10 @@ const QuestionManagement = ({ quiz, onBack }) => {
 
       for (const opt of q.options) {
         if (opt.answer_id) {
-          await updateAnswer(opt.answer_id,opt)
+          await axios.put(
+            `${API_BASE_URL}/answer/${opt.answer_id}/update`,
+            opt
+          );
         } else {
           await addAnswer(q.question_id, opt)
         }
@@ -392,7 +414,8 @@ const QuestionManagement = ({ quiz, onBack }) => {
     } else {
       const { question_id } = await addQuestion(quiz.quiz_id, q)
       //added toast
-      toast.success("Question Added!")
+      toast.success("Question Added!");
+      const newId = res.data.data.question_id;
       for (const opt of q.options) {
         await addAnswer(question_id, opt)
       }
@@ -402,11 +425,15 @@ const QuestionManagement = ({ quiz, onBack }) => {
   };
 
   const getTypeLabel = (type) => {
-    switch(type) {
-      case "MC": return "Multiple Choice";
-      case "CB": return "Checkbox";
-      case "TF": return "True/False";
-      default: return type;
+    switch (type) {
+      case "MC":
+        return "Multiple Choice";
+      case "CB":
+        return "Checkbox";
+      case "TF":
+        return "True/False";
+      default:
+        return type;
     }
   };
 
@@ -442,14 +469,12 @@ const QuestionManagement = ({ quiz, onBack }) => {
                 </span>
               </div>
             </div>
-          
+
             <button
               onClick={openAdd}
-              className="flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 sm:py-3 bg-[#217486] text-white rounded-xl hover:bg-[#1a5d6d] font-medium transition-all hover:shadow-xl hover:shadow-[#217486]/40 text-sm sm:text-base whitespace-nowrap"
+              className="flex items-center gap-2 px-4 py-3 bg-[#217486] text-white rounded-xl hover:bg-[#1a5d6d] font-medium transition-all hover:shadow-xl hover:shadow-[#217486]/40"
             >
-              <Plus className="w-4 h-4 sm:w-5 sm:h-5" /> 
-              <span className="hidden sm:inline">Add Question</span>
-              <span className="sm:hidden">Add</span>
+              <Plus className="w-5 h-5 hidden sm:inline" /> Add Question
             </button>
           </div>
         </div>
@@ -494,9 +519,9 @@ const QuestionManagement = ({ quiz, onBack }) => {
                           {q.question_text}
                         </h3>
                       </div>
-                      
-                      <div className="flex flex-wrap items-center gap-2 sm:gap-3 ml-9 sm:ml-11 mb-3">
-                        <span className="px-2.5 sm:px-3 py-1 bg-[#217486]/10 text-[#217486] rounded-lg text-xs font-semibold">
+
+                      <div className="flex items-center gap-3 ml-11 mb-3">
+                        <span className="px-3 py-1 bg-[#217486]/10 text-[#217486] rounded-lg text-xs font-semibold">
                           {getTypeLabel(q.question_type)}
                         </span>
                         <span className="px-2.5 sm:px-3 py-1 bg-gray-100 text-gray-700 rounded-lg text-xs font-semibold">
