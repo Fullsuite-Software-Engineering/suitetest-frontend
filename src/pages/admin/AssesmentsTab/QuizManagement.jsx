@@ -231,7 +231,7 @@ const QuizManagement = ({ department, onBack }) => {
               onClick={() => setShowAddModal(true)}
               className="flex items-center justify-center gap-2 bg-[#217486] text-white px-6 py-3 rounded-xl hover:bg-[#1a5d6d] font-medium transition-all hover:shadow-xl hover:shadow-[#217486]/40 w-full sm:w-auto"
             >
-              <Plus className="w-5 h-5" />
+              <Plus className="w-5 h-5 hidden sm:inline" />
               Create Quiz
             </button>
           </div>
@@ -445,7 +445,7 @@ const QuizManagement = ({ department, onBack }) => {
                 disabled={!newQuiz.quiz_name.trim() || !newQuiz.time_limit}
                 className="flex-1 px-4 py-3 bg-[#217486] hover:bg-[#1a5d6d] text-white rounded-xl transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-[#217486]/30 text-sm sm:text-base"
               >
-                Create Quiz
+                Proceed
               </button>
             </div>
           </div>
