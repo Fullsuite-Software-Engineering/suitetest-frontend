@@ -103,7 +103,7 @@ const QuizManagement = ({ department, onBack }) => {
   const handleAddPdfQuiz = async () => {
     if (
       !newPdfQuiz.quiz_name.trim() ||
-      !newPdfQuiz.time_limit ||
+      // !newPdfQuiz.time_limit ||
       !newPdfQuiz.pdf_link.trim()
     ) {
       toast.error("Please fill in all fields");
@@ -114,7 +114,7 @@ const QuizManagement = ({ department, onBack }) => {
       const payload = {
         dept_id: department.dept_id,
         quiz_name: newPdfQuiz.quiz_name,
-        time_limit: parseInt(newPdfQuiz.time_limit),
+        // time_limit: parseInt(newPdfQuiz.time_limit),
         pdf_link: newPdfQuiz.pdf_link.trim(),
       };
 
@@ -124,7 +124,8 @@ const QuizManagement = ({ department, onBack }) => {
       console.log("API Response:", response); // Debug log
 
       await fetchQuizzes();
-      setNewPdfQuiz({ quiz_name: "", time_limit: "", pdf_link: "" });
+      // setNewPdfQuiz({ quiz_name: "", time_limit: "", pdf_link: "" });
+      setNewPdfQuiz({ quiz_name: "",  pdf_link: "" });
       toast.success("PDF Test Added!");
       setShowAddPdfModal(false);
       setError(null);
@@ -137,21 +138,32 @@ const QuizManagement = ({ department, onBack }) => {
   };
 
   const handleUpdateQuiz = async () => {
-    if (
-      !editingQuiz ||
-      !editingQuiz.quiz_name.trim() ||
-      !editingQuiz.time_limit
-    )
-      return;
+    //added for pdf
+    if (!editingQuiz || !editingQuiz.quiz_name.trim()) return;
 
+    // if (
+    //   !editingQuiz ||
+    //   !editingQuiz.quiz_name.trim() ||
+    //   !editingQuiz.time_limit
+    // )
+    //   return;
+
+      // Standard quiz: time_limit required
+  if (!editingQuiz.pdf_link && !editingQuiz.time_limit) return;
+
+      //added ...editing
     try {
       const payload = {
         quiz_name: editingQuiz.quiz_name,
-        time_limit: parseInt(editingQuiz.time_limit),
+        // time_limit: parseInt(editingQuiz.time_limit),
         pdf_link: editingQuiz.pdf_link || null,
+        ...(editingQuiz.pdf_link ? {} : {time_limit: parseInt(editingQuiz.time_limit)})
       };
 
+      console.log("Update payload:", payload); //debugging
+
       await editQuiz(department.dept_id, editingQuiz.quiz_id, payload);
+
       await fetchQuizzes();
       toast.success("Quiz Updated!");
       setShowEditModal(false);
@@ -277,7 +289,7 @@ const QuizManagement = ({ department, onBack }) => {
               </button>
               <button
                 onClick={() => setShowAddPdfModal(true)}
-                className="flex items-center justify-center gap-2 bg-[#2a8fa5] text-white px-6 py-3 rounded-xl hover:bg-[#217486] font-medium transition-all hover:shadow-xl hover:shadow-[#2a8fa5]/40"
+                className="flex items-center justify-center gap-2 bg-[#217486] text-white px-6 py-3 rounded-xl hover:bg-[#217486] font-medium transition-all hover:shadow-xl hover:shadow-[#2a8fa5]/40"
               >
                 <FilePlus className="w-5 h-5 hidden sm:inline" />
                 Create PDF Test
@@ -323,7 +335,7 @@ const QuizManagement = ({ department, onBack }) => {
               </button>
               <button
                 onClick={() => setShowAddPdfModal(true)}
-                className="inline-flex items-center gap-2 px-6 py-3 bg-[#2a8fa5] text-white rounded-xl hover:bg-[#217486] font-medium transition-all shadow-lg shadow-[#2a8fa5]/30"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-[#217486] text-white rounded-xl hover:bg-[#217486] font-medium transition-all shadow-lg shadow-[#2a8fa5]/30"
               >
                 <FilePlus className="w-5 h-5" />
                 Create PDF Test
@@ -349,11 +361,16 @@ const QuizManagement = ({ department, onBack }) => {
                       <h3 className="text-lg sm:text-xl font-bold text-white leading-tight break-words">
                         {quiz.quiz_name}
                       </h3>
-                      {quiz.pdf_link && (
-                        <span className="inline-block mt-2 px-2 py-1 bg-white/20 text-white text-xs rounded-md font-medium">
-                          PDF Test
-                        </span>
-                      )}
+                      {quiz.pdf_link ? (
+                          <span className="inline-block mt-2 px-2 py-1 bg-white/20 text-white text-xs rounded-md font-medium">
+                            PDF Test
+                          </span>
+                        ) : (
+                          <span className="inline-block mt-2 px-2 py-1 bg-white/20 text-white text-xs rounded-md font-medium">
+                            Standard Test
+                          </span>
+                        )}
+
                     </div>
                     <div className="relative shrink-0">
                       <button
@@ -397,12 +414,14 @@ const QuizManagement = ({ department, onBack }) => {
                       )}
                     </div>
                   </div>
-
+                  
                   <div className="flex items-center gap-2 text-white/90">
-                    <Clock className="w-4 h-4" />
+                    {quiz.time_limit && (
+                      <Clock className="w-4 h-4" />
+                    )}
                     <span className="text-sm font-medium">
                       {quiz.time_limit}{" "}
-                      {quiz.time_limit === 1 ? "minute" : "minutes"}
+                      {!quiz.pdf_link && (quiz.time_limit === 1 ? "minute" : "minutes")}
                     </span>
                   </div>
                 </div>
@@ -421,6 +440,7 @@ const QuizManagement = ({ department, onBack }) => {
                   </div>
 
                   <div className="flex flex-col gap-2">
+                    {/* pdf test, if 0 questions, invite button disbaled */}
                     {quiz.pdf_link ? (
                       <>
                         <div className="flex gap-2">
@@ -447,7 +467,14 @@ const QuizManagement = ({ department, onBack }) => {
                             e.stopPropagation();
                             openInviteModal(quiz);
                           }}
-                          className="w-full flex items-center justify-center gap-2 bg-[#217486] hover:bg-[#1a5d6d] text-white px-4 py-2.5 rounded-lg text-sm font-medium transition-all shadow-md shadow-[#217486]/30"
+                          //added
+                          disabled={!quiz.question_count || quiz.question_count === 0} 
+                          className="w-full flex items-center justify-center gap-2 bg-[#217486] hover:bg-[#1a5d6d] text-white px-4 py-2.5 rounded-lg text-sm font-medium transition-all shadow-md shadow-[#217486]/30 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#217486]"
+                          title={
+                            !quiz.question_count || quiz.question_count === 0
+                              ? "Add questions before generating invites"
+                              : "Generate invite link"
+                          }
                         >
                           <LinkIcon className="w-4 h-4" />
                           Invite
@@ -472,7 +499,7 @@ const QuizManagement = ({ department, onBack }) => {
                           }
                           className="flex-1 flex items-center justify-center gap-2 bg-[#217486] hover:bg-[#1a5d6d] text-white px-4 py-2.5 rounded-lg text-sm font-medium transition-all shadow-md shadow-[#217486]/30 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#217486]"
                           title={
-                            !quiz.question_count || quiz.question_count === 0
+                            !quiz.question_count || quiz.question_count === 0 
                               ? "Add questions before generating invites"
                               : "Generate invite link"
                           }
@@ -563,7 +590,7 @@ const QuizManagement = ({ department, onBack }) => {
       {showAddPdfModal && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden">
-            <div className="bg-gradient-to-r from-[#2a8fa5] to-[#217486] p-6">
+            <div className="bg-[#217486] p-6">
               <h2 className="text-xl sm:text-2xl font-bold text-white">
                 Create PDF Test
               </h2>
@@ -588,7 +615,8 @@ const QuizManagement = ({ department, onBack }) => {
                   autoFocus
                 />
               </div>
-              <div>
+              {/* Pag pdf wala to */}
+              {/* <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
                   Time Limit (minutes)
                 </label>
@@ -602,7 +630,8 @@ const QuizManagement = ({ department, onBack }) => {
                   min="1"
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#2a8fa5] focus:border-transparent text-sm sm:text-base"
                 />
-              </div>
+              </div> */}
+              
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
                   Google Drive PDF Link
@@ -628,7 +657,7 @@ const QuizManagement = ({ department, onBack }) => {
                   setShowAddPdfModal(false);
                   setNewPdfQuiz({
                     quiz_name: "",
-                    time_limit: "",
+                    // time_limit: "",
                     pdf_link: "",
                   });
                 }}
@@ -640,7 +669,7 @@ const QuizManagement = ({ department, onBack }) => {
                 onClick={handleAddPdfQuiz}
                 disabled={
                   !newPdfQuiz.quiz_name.trim() ||
-                  !newPdfQuiz.time_limit ||
+                  // !newPdfQuiz.time_limit ||
                   !newPdfQuiz.pdf_link.trim()
                 }
                 className="flex-1 px-4 py-3 bg-[#2a8fa5] hover:bg-[#217486] text-white rounded-xl transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-[#2a8fa5]/30 text-sm sm:text-base"
@@ -681,28 +710,32 @@ const QuizManagement = ({ department, onBack }) => {
                   }
                   placeholder={`${editingQuiz.pdf_link ? "Test" : "Quiz"} name`}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#217486] focus:border-transparent text-sm sm:text-base"
-                  onKeyPress={(e) => e.key === "Enter" && handleUpdateQuiz()}
+                  // onKeyPress={(e) => e.key === "Enter" && handleUpdateQuiz()}
                   autoFocus
                 />
               </div>
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Time Limit (minutes)
-                </label>
-                <input
-                  type="number"
-                  value={editingQuiz.time_limit}
-                  onChange={(e) =>
-                    setEditingQuiz({
-                      ...editingQuiz,
-                      time_limit: e.target.value,
-                    })
-                  }
-                  placeholder="Time limit"
-                  min="1"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#217486] focus:border-transparent text-sm sm:text-base"
-                />
-              </div>
+              {/* pag pdf wala tong time limit */}
+                {!editingQuiz.pdf_link && (
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Time Limit (minutes)
+                    </label>
+                    <input
+                      type="number"
+                      value={editingQuiz.time_limit|| ""}
+                      onChange={(e) =>
+                        setEditingQuiz({
+                          ...editingQuiz,
+                          time_limit: e.target.value,
+                        })
+                      }
+                      placeholder="Time limit"
+                      min="1"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#217486] focus:border-transparent text-sm sm:text-base"
+                    />
+                  </div>
+                )}
+              {/* pag pdf eto lalabas, yung link */}
               {editingQuiz.pdf_link && (
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -737,7 +770,8 @@ const QuizManagement = ({ department, onBack }) => {
               <button
                 onClick={handleUpdateQuiz}
                 disabled={
-                  !editingQuiz.quiz_name.trim() || !editingQuiz.time_limit
+                  // !editingQuiz.quiz_name.trim() || !editingQuiz.time_limit
+                  !editingQuiz.quiz_name.trim() || (!editingQuiz.pdf_link && !editingQuiz.time_limit)
                 }
                 className="flex-1 px-4 py-3 bg-[#217486] hover:bg-[#1a5d6d] text-white rounded-xl transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-[#217486]/30 text-sm sm:text-base"
               >
