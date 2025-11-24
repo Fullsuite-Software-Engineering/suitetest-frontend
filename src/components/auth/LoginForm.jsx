@@ -20,7 +20,7 @@ const LoginForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const validEmail = "francis@getfullsuite.com";
+    const validEmail = "admin@getfullsuite.com";
     const validPassword = "password";
 
     if (email !== validEmail || password !== validPassword) {
@@ -104,7 +104,7 @@ const LoginForm = () => {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="francis@getfullsuite.com"
+                  placeholder="Enter your email"
                   className="w-full px-4 py-3.5 2xl:py-4 rounded-full text-gray-800 focus:outline-none focus:ring-2 focus:ring-white/50 transition-all duration-200 placeholder-gray-400"
                   style={{ backgroundColor: "#E8F4F6" }}
                   required
@@ -121,7 +121,7 @@ const LoginForm = () => {
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
+                  placeholder="Enter your password"
                   className="w-full px-4 py-3.5 2xl:py-4 pr-12 rounded-full text-gray-800 focus:outline-none focus:ring-2 focus:ring-white/50 transition-all duration-200 placeholder-gray-400"
                   style={{ backgroundColor: "#E8F4F6" }}
                   required

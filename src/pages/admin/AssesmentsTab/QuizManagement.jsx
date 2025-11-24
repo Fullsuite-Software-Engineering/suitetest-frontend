@@ -236,6 +236,10 @@ const QuizManagement = ({ department, onBack }) => {
     setCopied(false);
   };
 
+  // const filteredQuizzes = quizzes.filter((quiz) =>
+  //   quiz.quiz_name.toLowerCase().includes(searchTerm.toLowerCase())
+  // );
+
   const filteredQuizzes = quizzes.filter((quiz) =>
     quiz.quiz_name.toLowerCase().includes(searchTerm.toLowerCase())
   );
