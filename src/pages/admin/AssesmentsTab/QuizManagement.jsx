@@ -30,11 +30,11 @@ const QuizManagement = ({ department, onBack }) => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showInviteModal, setShowInviteModal] = useState(false);
-  const [newQuiz, setNewQuiz] = useState({ 
-    quiz_name: "", 
-    time_limit: "", 
+  const [newQuiz, setNewQuiz] = useState({
+    quiz_name: "",
+    time_limit: "",
     pdf_links: [""], // Changed to array for multiple links
-    is_pdf_test: false 
+    is_pdf_test: false,
   });
   const [editingQuiz, setEditingQuiz] = useState(null);
   const [deletingQuiz, setDeletingQuiz] = useState(null);
@@ -61,13 +61,13 @@ const QuizManagement = ({ department, onBack }) => {
     try {
       setLoading(true);
       const response = await getQuizzes(department.dept_id);
-      
+
       // Convert single pdf_link to array format for UI
-      const quizzesWithLinksArray = response.map(quiz => ({
+      const quizzesWithLinksArray = response.map((quiz) => ({
         ...quiz,
-        pdf_links: quiz.pdf_link ? quiz.pdf_link.split(',') : []
+        pdf_links: quiz.pdf_link ? quiz.pdf_link.split(",") : [],
       }));
-      
+
       setQuizzes(quizzesWithLinksArray);
       setError(null);
     } catch (err) {
@@ -97,7 +97,7 @@ const QuizManagement = ({ department, onBack }) => {
   const addPdfLink = () => {
     setNewQuiz({
       ...newQuiz,
-      pdf_links: [...newQuiz.pdf_links, ""]
+      pdf_links: [...newQuiz.pdf_links, ""],
     });
   };
 
@@ -106,7 +106,7 @@ const QuizManagement = ({ department, onBack }) => {
     updatedLinks[index] = value;
     setNewQuiz({
       ...newQuiz,
-      pdf_links: updatedLinks
+      pdf_links: updatedLinks,
     });
   };
 
@@ -117,13 +117,13 @@ const QuizManagement = ({ department, onBack }) => {
       updatedLinks[index] = "";
       setNewQuiz({
         ...newQuiz,
-        pdf_links: updatedLinks
+        pdf_links: updatedLinks,
       });
     } else {
       const updatedLinks = newQuiz.pdf_links.filter((_, i) => i !== index);
       setNewQuiz({
         ...newQuiz,
-        pdf_links: updatedLinks
+        pdf_links: updatedLinks,
       });
     }
   };
@@ -132,7 +132,7 @@ const QuizManagement = ({ department, onBack }) => {
   const addEditingPdfLink = () => {
     setEditingQuiz({
       ...editingQuiz,
-      pdf_links: [...editingQuiz.pdf_links, ""]
+      pdf_links: [...editingQuiz.pdf_links, ""],
     });
   };
 
@@ -141,7 +141,7 @@ const QuizManagement = ({ department, onBack }) => {
     updatedLinks[index] = value;
     setEditingQuiz({
       ...editingQuiz,
-      pdf_links: updatedLinks
+      pdf_links: updatedLinks,
     });
   };
 
@@ -152,13 +152,13 @@ const QuizManagement = ({ department, onBack }) => {
       updatedLinks[index] = "";
       setEditingQuiz({
         ...editingQuiz,
-        pdf_links: updatedLinks
+        pdf_links: updatedLinks,
       });
     } else {
       const updatedLinks = editingQuiz.pdf_links.filter((_, i) => i !== index);
       setEditingQuiz({
         ...editingQuiz,
-        pdf_links: updatedLinks
+        pdf_links: updatedLinks,
       });
     }
   };
@@ -177,7 +177,7 @@ const QuizManagement = ({ department, onBack }) => {
 
     // PDF test validation
     if (newQuiz.is_pdf_test) {
-      const validLinks = newQuiz.pdf_links.filter(link => link.trim() !== "");
+      const validLinks = newQuiz.pdf_links.filter((link) => link.trim() !== "");
       if (validLinks.length === 0) {
         toast.error("Please enter at least one PDF link");
         return;
@@ -194,14 +194,16 @@ const QuizManagement = ({ department, onBack }) => {
 
     try {
       let payload;
-      
+
       if (newQuiz.is_pdf_test) {
         // For PDF test - join multiple links with comma for database
-        const validLinks = newQuiz.pdf_links.filter(link => link.trim() !== "");
+        const validLinks = newQuiz.pdf_links.filter(
+          (link) => link.trim() !== ""
+        );
         payload = {
           dept_id: department.dept_id,
           quiz_name: newQuiz.quiz_name,
-          pdf_link: validLinks.join(','), // Join with comma for database
+          pdf_link: validLinks.join(","), // Join with comma for database
         };
       } else {
         // For standard quiz - only include time_limit, exclude pdf_link
@@ -217,22 +219,29 @@ const QuizManagement = ({ department, onBack }) => {
 
       await addQuiz(department.dept_id, payload);
       await fetchQuizzes();
-      setNewQuiz({ 
-        quiz_name: "", 
-        time_limit: "", 
+      setNewQuiz({
+        quiz_name: "",
+        time_limit: "",
         pdf_links: [""],
-        is_pdf_test: false 
+        is_pdf_test: false,
       });
       toast.success(newQuiz.is_pdf_test ? "PDF Test Added!" : "Quiz Added!");
       setShowAddModal(false);
       setError(null);
     } catch (err) {
-      const errorMessage = err.response?.data?.message || err.response?.data?.error || "Failed to create quiz";
+      const errorMessage =
+        err.response?.data?.message ||
+        err.response?.data?.error ||
+        "Failed to create quiz";
       setError(errorMessage);
       console.error("Error creating quiz:", err);
       console.error("Error response data:", err.response?.data);
       console.error("Error status:", err.response?.status);
-      toast.error(newQuiz.is_pdf_test ? "PDF Test Creation Failed!" : "Quiz Creation Failed!");
+      toast.error(
+        newQuiz.is_pdf_test
+          ? "PDF Test Creation Failed!"
+          : "Quiz Creation Failed!"
+      );
     }
   };
 
@@ -247,7 +256,9 @@ const QuizManagement = ({ department, onBack }) => {
 
     // PDF test validation
     if (editingQuiz.is_pdf_test) {
-      const validLinks = editingQuiz.pdf_links.filter(link => link.trim() !== "");
+      const validLinks = editingQuiz.pdf_links.filter(
+        (link) => link.trim() !== ""
+      );
       if (validLinks.length === 0) {
         toast.error("Please enter at least one PDF link");
         return;
@@ -264,13 +275,15 @@ const QuizManagement = ({ department, onBack }) => {
 
     try {
       let payload;
-      
+
       if (editingQuiz.is_pdf_test) {
         // For PDF test - join multiple links with comma for database
-        const validLinks = editingQuiz.pdf_links.filter(link => link.trim() !== "");
+        const validLinks = editingQuiz.pdf_links.filter(
+          (link) => link.trim() !== ""
+        );
         payload = {
           quiz_name: editingQuiz.quiz_name,
-          pdf_link: validLinks.join(','), // Join with comma for database
+          pdf_link: validLinks.join(","), // Join with comma for database
         };
       } else {
         // For standard quiz - only update time_limit, exclude pdf_link
@@ -289,7 +302,10 @@ const QuizManagement = ({ department, onBack }) => {
       setEditingQuiz(null);
       setError(null);
     } catch (err) {
-      const errorMessage = err.response?.data?.message || err.response?.data?.error || "Failed to update quiz";
+      const errorMessage =
+        err.response?.data?.message ||
+        err.response?.data?.error ||
+        "Failed to update quiz";
       setError(errorMessage);
       console.error("Error updating quiz:", err);
       toast.error("Quiz Update Failed!");
@@ -483,10 +499,15 @@ const QuizManagement = ({ department, onBack }) => {
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              setEditingQuiz({ 
-                                ...quiz, 
-                                is_pdf_test: !!(quiz.pdf_links && quiz.pdf_links.length > 0),
-                                pdf_links: quiz.pdf_links && quiz.pdf_links.length > 0 ? [...quiz.pdf_links] : [""]
+                              setEditingQuiz({
+                                ...quiz,
+                                is_pdf_test: !!(
+                                  quiz.pdf_links && quiz.pdf_links.length > 0
+                                ),
+                                pdf_links:
+                                  quiz.pdf_links && quiz.pdf_links.length > 0
+                                    ? [...quiz.pdf_links]
+                                    : [""],
                               });
                               setShowEditModal(true);
                               setOpenMenuId(null);
@@ -494,7 +515,10 @@ const QuizManagement = ({ department, onBack }) => {
                             className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-left text-gray-700 hover:bg-gray-50 transition-colors"
                           >
                             <Edit2 className="w-4 h-4 text-[#217486]" />
-                            Edit {quiz.pdf_links && quiz.pdf_links.length > 0 ? "PDF Test" : "Quiz"}
+                            Edit{" "}
+                            {quiz.pdf_links && quiz.pdf_links.length > 0
+                              ? "PDF Test"
+                              : "Quiz"}
                           </button>
                           <button
                             onClick={(e) => {
@@ -506,17 +530,22 @@ const QuizManagement = ({ department, onBack }) => {
                             className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-left text-red-600 hover:bg-red-50 transition-colors"
                           >
                             <Trash2 className="w-4 h-4" />
-                            Delete {quiz.pdf_links && quiz.pdf_links.length > 0 ? "PDF Test" : "Quiz"}
+                            Delete{" "}
+                            {quiz.pdf_links && quiz.pdf_links.length > 0
+                              ? "PDF Test"
+                              : "Quiz"}
                           </button>
                         </div>
                       )}
                     </div>
                   </div>
-                  
+
                   <div className="flex justify-between items-center mt-3 text-white/90">
                     {/* Left side: Test type */}
                     <span className="inline-block px-2 py-1 bg-white/20 text-white text-xs rounded-md font-medium">
-                      {quiz.pdf_links && quiz.pdf_links.length > 0 ? "PDF Test" : "Standard Test"}
+                      {quiz.pdf_links && quiz.pdf_links.length > 0
+                        ? "PDF Test"
+                        : "Standard Test"}
                     </span>
 
                     {/* Right side: Clock + time */}
@@ -524,7 +553,8 @@ const QuizManagement = ({ department, onBack }) => {
                       {quiz.time_limit && <Clock className="w-4 h-4" />}
                       <span className="text-sm font-medium">
                         {quiz.time_limit}{" "}
-                        {!quiz.pdf_links && (quiz.time_limit === 1 ? "minute" : "minutes")}
+                        {(!quiz.pdf_links || quiz.pdf_links.length === 0) &&
+                          (quiz.time_limit === 1 ? "minute" : "minutes")}
                       </span>
                     </div>
                   </div>
@@ -582,7 +612,9 @@ const QuizManagement = ({ department, onBack }) => {
                             e.stopPropagation();
                             openInviteModal(quiz);
                           }}
-                          disabled={!quiz.question_count || quiz.question_count === 0} 
+                          disabled={
+                            !quiz.question_count || quiz.question_count === 0
+                          }
                           className="w-full flex items-center justify-center gap-2 bg-[#217486] hover:bg-[#1a5d6d] text-white px-4 py-2.5 rounded-lg text-sm font-medium transition-all shadow-md shadow-[#217486]/30 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#217486]"
                           title={
                             !quiz.question_count || quiz.question_count === 0
@@ -613,7 +645,7 @@ const QuizManagement = ({ department, onBack }) => {
                           }
                           className="flex-1 flex items-center justify-center gap-2 bg-[#217486] hover:bg-[#1a5d6d] text-white px-4 py-2.5 rounded-lg text-sm font-medium transition-all shadow-md shadow-[#217486]/30 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#217486]"
                           title={
-                            !quiz.question_count || quiz.question_count === 0 
+                            !quiz.question_count || quiz.question_count === 0
                               ? "Add questions before generating invites"
                               : "Generate invite link"
                           }
@@ -653,7 +685,13 @@ const QuizManagement = ({ department, onBack }) => {
                 <div className="flex gap-4">
                   <button
                     type="button"
-                    onClick={() => setNewQuiz({ ...newQuiz, is_pdf_test: false, pdf_links: [""] })}
+                    onClick={() =>
+                      setNewQuiz({
+                        ...newQuiz,
+                        is_pdf_test: false,
+                        pdf_links: [""],
+                      })
+                    }
                     className={`flex-1 py-3 px-4 rounded-xl border-2 transition-all font-medium ${
                       !newQuiz.is_pdf_test
                         ? "border-[#217486] bg-[#217486] text-white shadow-lg shadow-[#217486]/30"
@@ -665,7 +703,13 @@ const QuizManagement = ({ department, onBack }) => {
                   </button>
                   <button
                     type="button"
-                    onClick={() => setNewQuiz({ ...newQuiz, is_pdf_test: true, time_limit: "" })}
+                    onClick={() =>
+                      setNewQuiz({
+                        ...newQuiz,
+                        is_pdf_test: true,
+                        time_limit: "",
+                      })
+                    }
                     className={`flex-1 py-3 px-4 rounded-xl border-2 transition-all font-medium ${
                       newQuiz.is_pdf_test
                         ? "border-[#2a8fa5] bg-[#2a8fa5] text-white shadow-lg shadow-[#2a8fa5]/30"
@@ -688,7 +732,9 @@ const QuizManagement = ({ department, onBack }) => {
                   onChange={(e) =>
                     setNewQuiz({ ...newQuiz, quiz_name: e.target.value })
                   }
-                  placeholder={`Enter ${newQuiz.is_pdf_test ? "test" : "quiz"} name`}
+                  placeholder={`Enter ${
+                    newQuiz.is_pdf_test ? "test" : "quiz"
+                  } name`}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#217486] focus:border-transparent text-sm sm:text-base"
                   onKeyPress={(e) => e.key === "Enter" && handleAddQuiz()}
                   autoFocus
@@ -717,7 +763,7 @@ const QuizManagement = ({ department, onBack }) => {
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Google Drive PDF Links
                   </label>
-                  
+
                   {newQuiz.pdf_links.map((link, index) => (
                     <div key={index} className="flex gap-2 items-start">
                       <div className="flex-1">
@@ -739,7 +785,7 @@ const QuizManagement = ({ department, onBack }) => {
                       </button>
                     </div>
                   ))}
-                  
+
                   <button
                     type="button"
                     onClick={addPdfLink}
@@ -748,9 +794,10 @@ const QuizManagement = ({ department, onBack }) => {
                     <Plus className="w-4 h-4" />
                     Add Another PDF Link
                   </button>
-                  
+
                   <p className="text-xs text-gray-500">
-                    Paste shareable links from Google Drive. Multiple PDFs are supported.
+                    Paste shareable links from Google Drive. Multiple PDFs are
+                    supported.
                   </p>
                 </div>
               )}
@@ -760,11 +807,11 @@ const QuizManagement = ({ department, onBack }) => {
               <button
                 onClick={() => {
                   setShowAddModal(false);
-                  setNewQuiz({ 
-                    quiz_name: "", 
-                    time_limit: "", 
+                  setNewQuiz({
+                    quiz_name: "",
+                    time_limit: "",
                     pdf_links: [""],
-                    is_pdf_test: false 
+                    is_pdf_test: false,
                   });
                 }}
                 className="flex-1 px-4 py-3 text-gray-700 bg-white hover:bg-gray-100 border border-gray-300 rounded-xl transition-colors font-medium text-sm sm:text-base"
@@ -774,13 +821,15 @@ const QuizManagement = ({ department, onBack }) => {
               <button
                 onClick={handleAddQuiz}
                 disabled={
-                  !newQuiz.quiz_name.trim() || 
+                  !newQuiz.quiz_name.trim() ||
                   (!newQuiz.is_pdf_test && !newQuiz.time_limit) ||
-                  (newQuiz.is_pdf_test && newQuiz.pdf_links.filter(link => link.trim() !== "").length === 0)
+                  (newQuiz.is_pdf_test &&
+                    newQuiz.pdf_links.filter((link) => link.trim() !== "")
+                      .length === 0)
                 }
                 className={`flex-1 px-4 py-3 text-white rounded-xl transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed shadow-lg text-sm sm:text-base ${
-                  newQuiz.is_pdf_test 
-                    ? "bg-[#2a8fa5] hover:bg-[#217486] shadow-[#2a8fa5]/30" 
+                  newQuiz.is_pdf_test
+                    ? "bg-[#2a8fa5] hover:bg-[#217486] shadow-[#2a8fa5]/30"
                     : "bg-[#217486] hover:bg-[#1a5d6d] shadow-[#217486]/30"
                 }`}
               >
@@ -800,7 +849,8 @@ const QuizManagement = ({ department, onBack }) => {
                 Edit {editingQuiz.is_pdf_test ? "PDF Test" : "Quiz"}
               </h2>
               <p className="text-white/80 text-sm mt-1">
-                Update {editingQuiz.is_pdf_test ? "pdf test" : "quiz"} information
+                Update {editingQuiz.is_pdf_test ? "pdf test" : "quiz"}{" "}
+                information
               </p>
             </div>
 
@@ -818,12 +868,14 @@ const QuizManagement = ({ department, onBack }) => {
                       quiz_name: e.target.value,
                     })
                   }
-                  placeholder={`${editingQuiz.is_pdf_test ? "PDF Test" : "Quiz"} name`}
+                  placeholder={`${
+                    editingQuiz.is_pdf_test ? "PDF Test" : "Quiz"
+                  } name`}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#217486] focus:border-transparent text-sm sm:text-base"
                   autoFocus
                 />
               </div>
-              
+
               {/* Conditional Fields */}
               {!editingQuiz.is_pdf_test ? (
                 <div>
@@ -849,14 +901,16 @@ const QuizManagement = ({ department, onBack }) => {
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Google Drive PDF Links
                   </label>
-                  
+
                   {editingQuiz.pdf_links.map((link, index) => (
                     <div key={index} className="flex gap-2 items-start">
                       <div className="flex-1">
                         <input
                           type="url"
                           value={link}
-                          onChange={(e) => updateEditingPdfLink(index, e.target.value)}
+                          onChange={(e) =>
+                            updateEditingPdfLink(index, e.target.value)
+                          }
                           placeholder="https://drive.google.com/file/d/..."
                           className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#2a8fa5] focus:border-transparent text-sm sm:text-base"
                         />
@@ -871,7 +925,7 @@ const QuizManagement = ({ department, onBack }) => {
                       </button>
                     </div>
                   ))}
-                  
+
                   <button
                     type="button"
                     onClick={addEditingPdfLink}
@@ -880,9 +934,10 @@ const QuizManagement = ({ department, onBack }) => {
                     <Plus className="w-4 h-4" />
                     Add Another PDF Link
                   </button>
-                  
+
                   <p className="text-xs text-gray-500">
-                    Paste shareable links from Google Drive. Multiple PDFs are supported.
+                    Paste shareable links from Google Drive. Multiple PDFs are
+                    supported.
                   </p>
                 </div>
               )}
@@ -901,9 +956,11 @@ const QuizManagement = ({ department, onBack }) => {
               <button
                 onClick={handleUpdateQuiz}
                 disabled={
-                  !editingQuiz.quiz_name.trim() || 
+                  !editingQuiz.quiz_name.trim() ||
                   (!editingQuiz.is_pdf_test && !editingQuiz.time_limit) ||
-                  (editingQuiz.is_pdf_test && editingQuiz.pdf_links.filter(link => link.trim() !== "").length === 0)
+                  (editingQuiz.is_pdf_test &&
+                    editingQuiz.pdf_links.filter((link) => link.trim() !== "")
+                      .length === 0)
                 }
                 className="flex-1 px-4 py-3 bg-[#217486] hover:bg-[#1a5d6d] text-white rounded-xl transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-[#217486]/30 text-sm sm:text-base"
               >
@@ -922,7 +979,10 @@ const QuizManagement = ({ department, onBack }) => {
               <Trash2 className="w-8 h-8 text-red-600" />
             </div>
             <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 text-center">
-              Delete {deletingQuiz.pdf_links && deletingQuiz.pdf_links.length > 0 ? "PDF Test" : "Quiz"}
+              Delete{" "}
+              {deletingQuiz.pdf_links && deletingQuiz.pdf_links.length > 0
+                ? "PDF Test"
+                : "Quiz"}
             </h2>
             <p className="text-sm sm:text-base text-gray-600 text-center mb-6">
               Are you sure you want to delete{" "}
@@ -949,7 +1009,10 @@ const QuizManagement = ({ department, onBack }) => {
                 onClick={handleDeleteQuiz}
                 className="flex-1 px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl transition-colors font-medium shadow-lg shadow-red-600/30 text-sm sm:text-base"
               >
-                Delete {deletingQuiz.pdf_links && deletingQuiz.pdf_links.length > 0 ? "Test" : "Quiz"}
+                Delete{" "}
+                {deletingQuiz.pdf_links && deletingQuiz.pdf_links.length > 0
+                  ? "Test"
+                  : "Quiz"}
               </button>
             </div>
           </div>
@@ -1051,7 +1114,11 @@ const QuizManagement = ({ department, onBack }) => {
                       <strong className="font-semibold">Note:</strong> Share
                       this link with examinees. They will be prompted to enter
                       their email when accessing the{" "}
-                      {selectedQuizForInvite.pdf_links && selectedQuizForInvite.pdf_links.length > 0 ? "test" : "quiz"}.
+                      {selectedQuizForInvite.pdf_links &&
+                      selectedQuizForInvite.pdf_links.length > 0
+                        ? "test"
+                        : "quiz"}
+                      .
                     </p>
                   </div>
                   <button
